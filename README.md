@@ -3,7 +3,7 @@
 
 Unofficial plug in to display current playing song to discord.
 
-##Example Screenshot
+## Example Screenshot
 
 ![alt text](./assets/screenshot.jpg)
 
