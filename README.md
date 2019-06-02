@@ -1,7 +1,9 @@
 ## TIDAL - Discord Rich Presence plug-in  (UNOFFICIAL)
 
 
-Unofficial plug in to display current playing song to discord.
+Unofficial plug in to obtain Discord Rich Presence.
+
+Feel free to report any bugs or make suggestions.
 
 ## Example Screenshot
 
