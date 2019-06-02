@@ -21,7 +21,7 @@ except you connect your account to last.fm .
 4.  *Optional*: Place the exe in windows start-up folder to start when computer starts.
 
 
-The scripts gets the information form last.fm so if you connect last.fm with your phone (or any other device that) and the script is running in your pc it will RPC will still work.
+**The scripts gets the information form last.fm so if you connect last.fm with your phone (or any other device that) and the script is running in your pc it will RPC will still work.**
 
 
 > Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
