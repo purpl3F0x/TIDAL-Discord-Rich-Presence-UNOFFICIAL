@@ -1,3 +1,4 @@
 pypresence
 pylast
 psutil
+PyQt5 >=5.12

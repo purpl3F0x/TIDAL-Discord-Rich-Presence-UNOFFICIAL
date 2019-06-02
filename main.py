@@ -4,11 +4,15 @@
 :version:
 """
 
+import sys
 from os import path
 from time import sleep, time
 
 import psutil
 import pylast
+from PyQt5.QtCore import QThread, Qt
+from PyQt5.QtGui import QIcon
+from PyQt5.QtWidgets import QAction, QApplication, QInputDialog, QMenu, QSystemTrayIcon
 from pypresence import Presence
 
 # configuration file containing API keys (provide your own)
@@ -18,116 +22,129 @@ SESSION_KEY_FILE = path.join(path.expanduser("~"), ".session_key")
 
 last_output = None
 user_name = ''
+user = None
+isRunning = True
+network = pylast.LastFMNetwork(API_KEY, API_SECRET)
 
 
-def ask_for_username():
-    """
-
-    Asks user for username
-    :return:
-    """
-    from tkinter import Tk
-    from tkinter import ttk
-
-    def exit():
-        global user_name
-        user_name = txt.get()
-        window.quit()
-
-    window = Tk()
-    if path.exists('icon.ico'):
-        window.iconbitmap('icon.ico')
-
-    window.title("Enter your Last.fm username")
-    window.resizable(0, 0)
-    window.geometry(
-        "{}x{}+{}+{}".format(350, 180, window.winfo_screenwidth() // 2 - 175, window.winfo_screenheight() // 2 - 90))
-    window.attributes('-topmost', True)
-
-    lbl = ttk.Label(window, text="Enter your Last.fm username", width=25)
-    lbl.place(x=100, y=40)
-
-    txt = ttk.Entry(window, width=25)
-    txt.place(x=100, y=70)
-
-    btn = ttk.Button(window, text="Ok", width=25, command=exit)
-    btn.place(x=100, y=120)
-
-    window.mainloop()
-    window.destroy()
-    return
+def change_state():
+    global isRunning
+    isRunning = not isRunning
+    is_running_action.setChecked(isRunning)
+    is_running_action.setText("Running" if isRunning else "Disabled")
+    print('Changed')
 
 
-if __name__ == "__main__":
-    network = pylast.LastFMNetwork(API_KEY, API_SECRET)
+app = QApplication([])
+icon = QSystemTrayIcon(QIcon('icon.ico'), parent=app)
 
-    if not path.exists(SESSION_KEY_FILE):
-        skg = pylast.SessionKeyGenerator(network)
-        url = skg.get_web_auth_url()
+title = QAction(QIcon('icon.ico'), "TIDAL RPC")
 
-        print(f"Please authorize the scrobbler to scrobble to your account: {url}\n")
-        import webbrowser
-        webbrowser.open(url)
+is_running_action = QAction("Running")
+is_running_action.setCheckable(True)
+is_running_action.setChecked(True)
+is_running_action.triggered.connect(change_state)
+
+quit_action = QAction("Exit")
+quit_action.triggered.connect(lambda: sys.exit())
+
+tray_menu = QMenu(parent=None)
+
+tray_menu.addAction(title)
+tray_menu.addAction(is_running_action)
+tray_menu.addAction(quit_action)
+
+icon.setContextMenu(tray_menu)
+icon.show()
+
+
+class AThread(QThread):
+    def run(self):
+        global isRunning, network, user
+        playing_track = None
+
+        client_id = '584458858731405315'  # Discord BOT id, put your real one here
+        RPC = Presence(client_id)  # Initialize the client class
+        RPC.connect()  # Start the handshake loop
 
         while True:
             try:
-                session_key = skg.get_web_auth_session_key(url)
-                fp = open(SESSION_KEY_FILE, "w")
-                ask_for_username()
-                fp.writelines([user_name, '\n', session_key])
-                fp.close()
-                exit()
-                break
-            except pylast.WSError:
-                sleep(1)
-    else:
-        try:
-            with open(SESSION_KEY_FILE, 'r') as ss:
-                user_name = ss.readline()[:-1]
-                session_key = ss.readline()
-                print('Found', user_name, session_key)
-        except ...:
-            print('Error reading session stage.')
-            exit()
+                if not isRunning:
+                    RPC.clear()
+                    continue
+                new_track = user.get_now_playing()
+                # A new, different track
+                if new_track and new_track != playing_track:
+                    playing_track = new_track
+                    print(playing_track.get_name())
+                    print(playing_track.get_artist())
+                    dur = new_track.get_duration()
 
-    network.session_key = session_key
-    user = network.get_user(user_name)
+                    print(
+                        RPC.update(
+                            state=str(playing_track.get_name()),
+                            details=str(playing_track.get_artist()),
+                            large_image='fb_1200x627',
+                            # small_image='tidalogo_0',
+                            end=int(time()) + dur / 1000 if dur else None,
+                            start=int(time()),
+                        )
+                    )  # Set the presence
+                    title.setText(str(playing_track.get_name()))
+                # check if song is played
+                elif not new_track and playing_track and "TIDAL.exe" in (p.name() for p in psutil.process_iter()):
+                    print('song paused ?')
 
-    playing_track = None
+                # clear status
+                elif not new_track:
+                    RPC.clear()
 
-    client_id = '584458858731405315'  # Discord BOT id, put your real one here
-    RPC = Presence(client_id)  # Initialize the client class
-    RPC.connect()  # Start the handshake loop
+            except Exception as e:
+                print("Error: %s" % repr(e))
+
+            sleep(2)
+
+
+########
+if not path.exists(SESSION_KEY_FILE):
+    skg = pylast.SessionKeyGenerator(network)
+    url = skg.get_web_auth_url()
+
+    print(f"Please authorize the scrobbler to scrobble to your account: {url}\n")
+    import webbrowser
+
+    webbrowser.open(url)
 
     while True:
         try:
-            new_track = user.get_now_playing()
-            # A new, different track
-            if new_track and new_track != playing_track:
-                playing_track = new_track
-                print(playing_track.get_name())
-                print(playing_track.get_artist())
-                dur = new_track.get_duration()
+            session_key = skg.get_web_auth_session_key(url)
+            a = QInputDialog(None, Qt.WindowStaysOnTopHint)
+            a.setWindowFlags(Qt.WindowStaysOnTopHint)
+            user_name, ok = a.getText(None, 'TIDAL - Discord RPC', 'Enter your last.fm username')
+            if not ok:
+                sys.exit(0)
 
-                print(
-                    RPC.update(
-                        state=str(playing_track.get_name()),
-                        details=str(playing_track.get_artist()),
-                        large_image='fb_1200x627',
-                        # small_image='tidalogo_0',
-                        end=int(time()) + dur / 1000 if dur else None,
-                        start=int(time()),
-                    )
-                )  # Set the presence
-            # check if song is played
-            elif not new_track and playing_track and "TIDAL.exe" in (p.name() for p in psutil.process_iter()):
-                print('song paused ?')
+            fp = open(SESSION_KEY_FILE, "w")
+            fp.writelines([user_name, '\n', session_key])
+            fp.close()
+            break
+        except pylast.WSError:
+            sleep(1)
+else:
+    try:
+        with open(SESSION_KEY_FILE, 'r') as ss:
+            user_name = ss.readline()[:-1]
+            session_key = ss.readline()
+            print('Found', user_name, session_key)
+    except ...:
+        print('Error reading session stage.')
+        exit()
 
-            # clear status
-            elif not new_track:
-                RPC.clear()
+network.session_key = session_key
+user = network.get_user(user_name)
 
-        except Exception as e:
-            print("Error: %s" % repr(e))
+print('Starting main app')
+thread = AThread()
+thread.start()
 
-        sleep(2)
+sys.exit(app.exec_())
