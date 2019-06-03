@@ -18,6 +18,20 @@ from pypresence import Presence
 # configuration file containing API keys (provide your own)
 from config import *
 
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = path.abspath(".")
+
+    return path.join(base_path, relative_path)
+
+
+ICON_PATH = resource_path('icon.ico')
+print(ICON_PATH)
 SESSION_KEY_FILE = path.join(path.expanduser("~"), ".session_key")
 
 last_output = None
@@ -36,9 +50,9 @@ def change_state():
 
 
 app = QApplication([])
-icon = QSystemTrayIcon(QIcon('icon.ico'), parent=app)
+icon = QSystemTrayIcon(QIcon(ICON_PATH), parent=app)
 
-title = QAction(QIcon('icon.ico'), "TIDAL RPC")
+title = QAction(QIcon(ICON_PATH), "TIDAL RPC")
 
 is_running_action = QAction("Running")
 is_running_action.setCheckable(True)
