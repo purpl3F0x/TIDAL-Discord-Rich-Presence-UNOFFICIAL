@@ -28,8 +28,9 @@ except you connect your account to last.fm .
 **The scripts gets the information form last.fm so if you connect last.fm with your phone (or any other device that) and the script is running in your pc it will RPC will still work.**
 
 The program registers an icon on the taskbar, where you can see the song playing and temporary disable *rich presence*.
+
 ![alt text](./assets/taskbar.jpg) ![alt text](./assets/taskbar_opened.png)
-![alt text](./assets/taskbar.jpg) ![alt text](./assets/taskbar_opened.png)
+
 
 
 > Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
