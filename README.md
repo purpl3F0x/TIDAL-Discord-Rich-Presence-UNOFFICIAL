@@ -33,8 +33,8 @@ The program registers an icon on the taskbar, where you can see the song playing
 
 
 
-> Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
+## Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
 
 ---
 
-#### Stavros Avramidis Never Settle & Keep Running
+> # Stavros Avramidis Never Settle & Keep Running
