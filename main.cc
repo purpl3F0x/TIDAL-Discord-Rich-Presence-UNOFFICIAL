@@ -5,8 +5,10 @@
 
 
 /* C++ libs */
+#include <cctype>
 #include <chrono>
 #include <exception>
+#include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -32,6 +34,7 @@
 #ifdef WIN32
 #include <Windows.h>
 #pragma comment(lib, "discord-rpc.lib")
+#include "windows_api_hook.hh"
 
 #elif defined(__APPLE__) or defined(__MACH__)
 #elif defined(__linux__)
@@ -39,18 +42,39 @@
 #   error "unkown target os"
 #endif
 
-#define API_KEY "0bd4a33cd0178d9b9d969a02c80bd8b8"
+#define CURRENT_TIME std::time(nullptr)
+#define HIFI_ASSET "hifi"
 
 static std::string username("purple_runner");
 static const char *APPLICATION_ID = "584458858731405315";
 volatile bool isPresenceActive = true;
 
 struct Song {
-  int64_t runtime;
+  enum AudioQualityEnum { master, hifi, normal };
+
   std::string title;
   std::string artist;
   std::string album;
   std::string url;
+  int64_t starttime;
+  int64_t runtime;
+  uint64_t pausedtime;
+  uint_fast8_t trackNumber;
+  uint_fast8_t volumeNumber;
+  bool isPaused = false;
+  AudioQualityEnum quality;
+
+  void setQuality(const std::string &q) {
+      if (q == "HI_RES") {
+          quality = master;
+      } else {
+          quality = hifi;
+      }
+  }
+
+  inline bool isHighRes() const noexcept {
+      return quality == master;
+  }
 
   friend std::ostream &operator<<(std::ostream &out, const Song &song) {
       out << song.title << " of " << song.album << " from " << song.artist << "(" << song.runtime << ")";
@@ -58,18 +82,21 @@ struct Song {
   }
 };
 
-static int prompt(char *line, size_t size) {
-    int res;
-    char *nl;
-    printf("\n> ");
-    fflush(stdout);
-    res = fgets(line, (int) size, stdin) ? 1 : 0;
-    line[size - 1] = 0;
-    nl = strchr(line, '\n');
-    if (nl) {
-        *nl = 0;
+std::string urlEncode(const std::string &value) {
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (std::string::value_type c: value) {
+        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+            escaped << c;
+        else {
+            escaped << std::uppercase;
+            escaped << '%' << std::setw(2) << int((unsigned char) c);
+            escaped << std::nouppercase;
+        }
     }
-    return res;
+    return escaped.str();
 }
 
 static void updateDiscordPresence(const Song &song) {
@@ -78,11 +105,16 @@ static void updateDiscordPresence(const Song &song) {
         memset(&discordPresence, 0, sizeof(discordPresence));
         discordPresence.state = song.title.c_str();
         discordPresence.details = song.artist.c_str();
-        discordPresence.startTimestamp = std::time(nullptr);
-        if (song.runtime) discordPresence.endTimestamp = discordPresence.startTimestamp + song.runtime;
-        std::cout << song.runtime << "\n";
-        discordPresence.largeImageKey = "fb_1200x627";
+        if (song.isPaused) {
+            discordPresence.smallImageKey = "pause";
+            discordPresence.smallImageText = "Paused";
+        } else {
+            discordPresence.endTimestamp = song.starttime + song.runtime + song.pausedtime;
+        }
+        discordPresence.largeImageKey = song.isHighRes() ? "test" : HIFI_ASSET;
+        discordPresence.largeImageText = song.isHighRes() ? "Playing High-Res Audio" : "";
         discordPresence.instance = 0;
+
         Discord_UpdatePresence(&discordPresence);
     } else {
         Discord_ClearPresence();
@@ -117,66 +149,78 @@ inline void rpcLoop() {
 
     using json = nlohmann::json;
     using string = std::string;
-    httplib::Client cli("ws.audioscrobbler.com");
+    httplib::Client cli("api.tidal.com");
 
-    char getLastSongBuf[128];
-    char getSongInfoBuf[256];
+    char getSongInfoBuf[1024];
     json j;
 
     Song curSong;
 
-    sprintf(getLastSongBuf,
-            "/2.0/?method=user.getRecentTracks&user=%s&api_key=%s&format=json&limit=1",
-            username.c_str(),
-            API_KEY);
-
     for (;;) {
-        try {
-            auto res = cli.Get(getLastSongBuf);
+        std::wstring tmpTrack, tmpArtist;
 
-            if (res && res->status==200) {
-                j = json::parse(res->body);
-                auto first_track = j["recenttracks"]["track"][0];
+        auto localStatus = tidalInfo(tmpTrack, tmpArtist);
 
-                try {
-                    first_track["@attr"]["nowplaying"].get<std::string>();
-                } catch (std::exception &e) {
-                    Discord_ClearPresence();
-                    goto _continue;
-                }
+        // If song is playing
+        if (localStatus == playing) {
+            // if new song is playing
+            if (safeWstringToString(tmpTrack) != curSong.title || safeWstringToString(tmpArtist) != curSong.artist) {
+                // assign new info to current track
+                curSong.title = safeWstringToString(tmpTrack);
+                curSong.artist = safeWstringToString(tmpArtist);
 
-                if (first_track["@attr"]["nowplaying"].get<std::string>()=="true") {
-                    if (curSong.title!=first_track["name"].get<std::string>()) {
+                curSong.runtime = 0;
+                curSong.pausedtime = 0;
+                curSong.setQuality("");
 
-                        std::clog << first_track["name"].get<std::string>();
-                        std::clog << " - " << first_track["artist"]["#text"].get<std::string>() << "\n";
-                        curSong.title = first_track["name"].get<std::string>();
-                        curSong.artist = first_track["artist"]["#text"].get<std::string>();
-                        curSong.album = first_track["album"]["#text"].get<std::string>();
-                        curSong.runtime = 0;
+                // get info form TIDAL api
+                auto search_param = std::string(curSong.title + " - " + curSong.artist.substr(0, curSong.artist.find('&')));
+                sprintf(getSongInfoBuf,
+                        "/v1/search?query=%s&limit=10&offset=0&types=TRACKS&countryCode=GR?token=wdgaB1CilGA-S_s2",
+                        urlEncode(search_param).c_str());
 
-                        auto songURL = first_track["url"].get<std::string>();
+                auto res = cli.Get(getSongInfoBuf);
 
-                        sprintf(getSongInfoBuf,
-                                "/2.0/?method=track.getInfo&api_key=%s&format=json&artist=%s&track=%s",
-                                API_KEY,
-                                curSong.artist.c_str(),
-                                curSong.title.c_str()
-                        );
-                        res = cli.Get(getSongInfoBuf);
-                        j = json::parse(res->body);
-                        curSong.runtime = (int64_t) stoi(j["track"]["duration"].get<std::string>())/1000;
+                if (res && res->status == 200) {
+                    j = json::parse(res->body);
+                    for (auto i = 0u; i < j["tracks"]["totalNumberOfItems"].get<unsigned>() ; i++) {
+                        // convert title from windows and from tidal api to strings, json lib doesn't support wide string
+                        // so wstrings are pared as strings and have the same convention errors
+                        auto fetched_str = j["tracks"]["items"][i]["title"].get<std::string>();
+                        auto c_str = rawWstringToString(tmpTrack);
 
-                        updateDiscordPresence(curSong);
-
+                        if (fetched_str == c_str) {
+                            std::cout << curSong.title << "\n";
+                            curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
+                            curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
+                            curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
+                            curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
+                            break;
+                        }
                     }
                 }
-            } else if (res && res->status==404)
-                std::cerr << "User not found";
+
+                #ifdef DEBUG
+                std::cout << curSong.title << "\tFrom: " << curSong.artist << std::endl;
+                #endif
+
+                // get time just before passing it to RPC handlers
+                curSong.starttime = 2 + CURRENT_TIME;  // add 2 seconds to be more accurate.
+                updateDiscordPresence(curSong);
+            } else {
+                if (curSong.isPaused) {
+                    curSong.isPaused = false;
+                    updateDiscordPresence(curSong);
+                }
+            }
+        } else if (localStatus == opened) {
+            if ((CURRENT_TIME - (curSong.starttime + curSong.runtime + curSong.pausedtime) > 2)) {
+                curSong.pausedtime += 1;
+                curSong.isPaused = true;
+            }
+            updateDiscordPresence(curSong);
         }
-        catch (std::exception &e) {
-            std::cerr << e.what() << '\n';
-        }
+
         _continue:
         std::this_thread::sleep_for(std::chrono::milliseconds(1000));
 

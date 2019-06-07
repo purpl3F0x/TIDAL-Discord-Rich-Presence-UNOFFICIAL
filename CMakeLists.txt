@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 
 project(TIDAL-RPC)
 
+include_directories(.)
 add_executable(tidal-rpc main.cc)
 
 
@@ -46,7 +47,7 @@ target_link_libraries(tidal-rpc Qt5::Widgets)
 if (MSVC)
     STRING(REPLACE "/Od" "/O2" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
 else ()
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 --ffast-math")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -ffast-math")
 endif ()
 
 if (WIN32)
