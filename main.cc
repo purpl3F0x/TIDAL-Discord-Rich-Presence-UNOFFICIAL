@@ -45,7 +45,7 @@
 #define CURRENT_TIME std::time(nullptr)
 #define HIFI_ASSET "hifi"
 
-static std::string username("purple_runner");
+static std::string lastfmUsername;
 static const char *APPLICATION_ID = "584458858731405315";
 volatile bool isPresenceActive = true;
 
@@ -109,7 +109,8 @@ static void updateDiscordPresence(const Song &song) {
             discordPresence.smallImageKey = "pause";
             discordPresence.smallImageText = "Paused";
         } else {
-            discordPresence.endTimestamp = song.starttime + song.runtime + song.pausedtime;
+            if (song.runtime)discordPresence.endTimestamp = song.starttime + song.runtime + song.pausedtime;
+            else discordPresence.startTimestamp = song.starttime;
         }
         discordPresence.largeImageKey = song.isHighRes() ? "test" : HIFI_ASSET;
         discordPresence.largeImageText = song.isHighRes() ? "Playing High-Res Audio" : "";
@@ -174,29 +175,33 @@ inline void rpcLoop() {
                 curSong.setQuality("");
 
                 // get info form TIDAL api
-                auto search_param = std::string(curSong.title + " - " + curSong.artist.substr(0, curSong.artist.find('&')));
+                auto search_param =
+                    std::string(curSong.title + " - " + curSong.artist.substr(0, curSong.artist.find('&')));
                 sprintf(getSongInfoBuf,
-                        "/v1/search?query=%s&limit=10&offset=0&types=TRACKS&countryCode=GR?token=wdgaB1CilGA-S_s2",
+                        "/v1/search?query=%s&limit=50&offset=0&types=TRACKS&countryCode=GR?token=wdgaB1CilGA-S_s2",
                         urlEncode(search_param).c_str());
 
                 auto res = cli.Get(getSongInfoBuf);
 
                 if (res && res->status == 200) {
-                    j = json::parse(res->body);
-                    for (auto i = 0u; i < j["tracks"]["totalNumberOfItems"].get<unsigned>() ; i++) {
-                        // convert title from windows and from tidal api to strings, json lib doesn't support wide string
-                        // so wstrings are pared as strings and have the same convention errors
-                        auto fetched_str = j["tracks"]["items"][i]["title"].get<std::string>();
-                        auto c_str = rawWstringToString(tmpTrack);
+                    try {
+                        j = json::parse(res->body);
+                        for (auto i = 0u; i < j["tracks"]["totalNumberOfItems"].get<unsigned>(); i++) {
+                            // convert title from windows and from tidal api to strings, json lib doesn't support wide string
+                            // so wstrings are pared as strings and have the same convention errors
+                            auto fetched_str = j["tracks"]["items"][i]["title"].get<std::string>();
+                            auto c_str = rawWstringToString(tmpTrack);
 
-                        if (fetched_str == c_str) {
-                            std::cout << curSong.title << "\n";
-                            curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
-                            curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
-                            curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
-                            curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
-                            break;
+                            if (fetched_str == c_str) {
+                                curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
+                                curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
+                                curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
+                                curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
+                                break;
+                            }
                         }
+                    } catch (...) {
+                        std::cerr << "Error getting info from api: " << curSong << "\n";
                     }
                 }
 
@@ -213,8 +218,9 @@ inline void rpcLoop() {
                     updateDiscordPresence(curSong);
                 }
             }
+
         } else if (localStatus == opened) {
-            if ((CURRENT_TIME - (curSong.starttime + curSong.runtime + curSong.pausedtime) > 2)) {
+            if ((CURRENT_TIME - (curSong.starttime + curSong.runtime + curSong.pausedtime) > 5)) {
                 curSong.pausedtime += 1;
                 curSong.isPaused = true;
             }
@@ -230,6 +236,18 @@ inline void rpcLoop() {
 int main(int argc, char **argv) {
     using json = nlohmann::json;
     using string = std::string;
+
+    std::ifstream i("settings.json");
+    json j;
+    i >> j;
+
+    try {
+        lastfmUsername = j["last_fm_username"].get<string>();
+    } catch (...) {
+        std::cerr << "Couldn't read last.fm username\n";
+    }
+
+    std::cout << j.dump(2) << "\n";
 
     QApplication app(argc, argv);
     app.setWindowIcon(QIcon("icon.ico"));
