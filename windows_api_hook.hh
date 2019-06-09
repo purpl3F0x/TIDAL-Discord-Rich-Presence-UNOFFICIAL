@@ -111,3 +111,10 @@ status tidalInfo(std::wstring &song, std::wstring &artist) {
     }
     return param.tidalStatus;
 }
+
+inline char *getLocale() noexcept {
+    static char buffer[3];
+    GEOID myGEO = GetUserGeoID(GEOCLASS_NATION);
+    int result = GetGeoInfoA(myGEO, GEO_ISO2, buffer, 3, 0);
+    return buffer;
+}

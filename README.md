@@ -41,6 +41,9 @@ The program registers an icon on the taskbar, where you can see the song playing
 ![alt text](./assets/taskbar.jpg) ![alt text](./assets/taskbar_opened.png)
 
 
+## Build Instructions
+
+To build the executable you'll need either msvc on windows or clang on osx. For windows I had problems with gcc either conflicting with discord lib on (debug) and http not have <mutex>.
 
 
 ### Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
