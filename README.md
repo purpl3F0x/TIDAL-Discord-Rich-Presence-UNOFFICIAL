@@ -10,8 +10,17 @@ Feel free to report any bugs or make suggestions.
 
 ![alt text](./assets/screenshot.jpg)
 
+When playing a song with master audio quality.
 
-### Instructions
+![alt text](./assets/highres.jpg)
+
+
+![alt text](./assets/paused.jpg)
+
+If you have paused playback
+
+
+## Instructions
 Because TIDAL does not have a public api, It's not possible to get the current playing song,
 except you connect your account to last.fm .
 
@@ -33,7 +42,8 @@ The program registers an icon on the taskbar, where you can see the song playing
 
 
 
-## Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
+
+### Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
 
 ---
 
