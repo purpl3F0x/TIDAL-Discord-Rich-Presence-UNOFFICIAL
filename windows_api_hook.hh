@@ -102,10 +102,6 @@ status tidalInfo(std::wstring &song, std::wstring &artist) {
     artist = L"";
 
    EnumWindowsProcParam param(pids, song, artist);
-//    param.pids = pids;
-//    param.song = song;
-//    param.artist = artist;
-//    param.tidalStatus = closed;
 
     EnumWindows(enumWindowsProc, reinterpret_cast<LPARAM>(&param));
 

@@ -7,6 +7,9 @@ include_directories(.)
 add_executable(tidal-rpc main.cc)
 
 
+set(CMAKE_PREFIX_PATH "/usr/local/opt/qt5/lib/cmake/Qt5Widgets/")
+
+
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 # Instruct CMake to run moc automatically when needed
@@ -64,6 +67,10 @@ if (WIN32)
         target_include_directories(tidal-rpc PRIVATE discord-rpc/win32-dynamic/include)
         target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/win32-dynamic/lib/discord-rpc.lib)
     endif ()
+
+elseif (APPLE)
+    message("Building for MacOS")
+    include_directories(discord-rpc/osx-static/include)
+    target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/osx-static/lib/libdiscord-rpc.a)
+    set(CMAKE_CXX_FLAGS "-framework carbon -framework foundation -framework CoreFoundation")
 endif ()
-
-
