@@ -47,19 +47,21 @@ target_link_libraries(tidal-rpc Qt5::Widgets)
 #endif(WIN32)
 
 
-if (MSVC)
-    STRING(REPLACE "/Od" "/O2" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
-else ()
-    set(CMAKE_CXX_FLAGS_RELEASE "-O2 -ffast-math")
-endif ()
-
 if (WIN32)
+
+    if (MSVC)
+        STRING(REPLACE "/Od" "/O2" CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE})
+    else ()
+        set(CMAKE_CXX_FLAGS_RELEASE "-O2 -ffast-math")
+    endif ()
+
+
     message("Building for Windows")
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits
         message("\t64-bit")
-        include_directories(.discord-rpc/win64-static/include)
-        target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/win64-static/lib/discord-rpc.lib)
+        target_include_directories(tidal-rpc PRIVATE discord-rpc/win64-dynamic/include)
+        target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/win64-dynamic/lib/discord-rpc.lib)
 
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         # 32 bits
