@@ -14,10 +14,10 @@ When playing a song with master audio quality.
 
 ![alt text](./assets/highres.jpg)
 
+or you have paused playback
 
 ![alt text](./assets/paused.jpg)
 
-If you have paused playback
 
 
 ## Instructions
@@ -48,6 +48,12 @@ To build the executable you'll need either msvc on windows or clang on osx. For 
 
 ### Disclaimer: This project is Unofficial and it's not published from TIDAL.com &/ Aspiro.
 
----
+Kudos to:
++ https://github.com/nlohmann/json
++ https://github.com/yhirose/cpp-httplib
 
-> # Stavros Avramidis Never Settle & Keep Running
+for their awesome work.
+
+</br>
+
+> ### Stavros Avramidis Never Settle & Keep Running
