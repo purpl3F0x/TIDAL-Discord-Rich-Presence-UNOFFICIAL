@@ -32,9 +32,9 @@
 #include "json.hh"
 
 #ifdef WIN32
-#include <Windows.h>
-#pragma comment(lib, "discord-rpc.lib")
+
 #include "windows_api_hook.hh"
+#pragma comment(lib, "discord-rpc.lib")
 
 #elif defined(__APPLE__) or defined(__MACH__)
 #include <Carbon/Carbon.h>
@@ -86,13 +86,14 @@ struct Song {
   }
 };
 
+#include <locale>
 std::string urlEncode(const std::string &value) {
     std::ostringstream escaped;
     escaped.fill('0');
     escaped << std::hex;
 
     for (std::string::value_type c: value) {
-        if (isalnum(c) || c == '-' || c == '_' || c == '.' || c == '~')
+        if (isalnum((unsigned char) c) || c == '-' || c == '_' || c == '.' || c == '~')
             escaped << c;
         else {
             escaped << std::uppercase;
@@ -169,10 +170,10 @@ inline void rpcLoop() {
         // If song is playing
         if (localStatus == playing) {
             // if new song is playing
-            if (safeWstringToString(tmpTrack) != curSong.title || safeWstringToString(tmpArtist) != curSong.artist) {
+            if (rawWstringToString(tmpTrack) != curSong.title || rawWstringToString(tmpArtist) != curSong.artist) {
                 // assign new info to current track
-                curSong.title = safeWstringToString(tmpTrack);
-                curSong.artist = safeWstringToString(tmpArtist);
+                curSong.title = rawWstringToString(tmpTrack);
+                curSong.artist = rawWstringToString(tmpArtist);
 
                 curSong.runtime = 0;
                 curSong.pausedtime = 0;
@@ -181,9 +182,12 @@ inline void rpcLoop() {
                 // get info form TIDAL api
                 auto search_param =
                     std::string(curSong.title + " - " + curSong.artist.substr(0, curSong.artist.find('&')));
+
                 sprintf(getSongInfoBuf,
                         "/v1/search?query=%s&limit=50&offset=0&types=TRACKS&countryCode=%s?token=wdgaB1CilGA-S_s2",
                         urlEncode(search_param).c_str(), countryCode ? countryCode : "US");
+
+                std::clog << "Querying :" << getSongInfoBuf << "\n";
 
                 auto res = cli.Get(getSongInfoBuf);
 
@@ -241,6 +245,7 @@ int main(int argc, char **argv) {
     using json = nlohmann::json;
     using string = std::string;
 
+    // get country code for TIDAL api queries
     countryCode = getLocale();
 
 //  try {
