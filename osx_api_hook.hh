@@ -28,7 +28,7 @@ std::string safeWstringToString(const std::wstring& wstr) {
 }
 
 std::string rawWstringToString(const std::wstring& wstr) {
-  return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
+  return std::string(wstr.begin(), wstr.end());
 }
 
 enum status { error, closed, opened, playing };
