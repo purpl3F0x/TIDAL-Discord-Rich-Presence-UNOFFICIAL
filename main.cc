@@ -131,7 +131,6 @@ static void updateDiscordPresence(const Song &song) {
             discordPresence.spectateSecret = song.id;
         discordPresence.instance = 0;
 
-
         Discord_UpdatePresence(&discordPresence);
     } else {
         Discord_ClearPresence();
@@ -153,9 +152,18 @@ static void handleDiscordError(int errcode, const char *message) {
     std::cerr << "Discord: Error (" << errcode << " : " << message << ")\n";
 }
 
-//static void handleDiscordSpectate(const char* secret) {
-//    printf("\nDiscord: spectate (%s)\n", secret);
-//}
+
+static void handleDiscordSpectate(const char *secret) {
+    char buffer[64];
+    #ifdef WIN32
+    sprintf(buffer, "https://listen.tidal.com/track/%s", secret);
+    ShellExecute(nullptr, "open", buffer, nullptr, nullptr, SW_SHOWNORMAL | SW_RESTORE);
+    #else
+    sprintf(buffer, "open https://listen.tidal.com/track/%s", secret);
+    system(buffer);
+    #endif
+}
+
 
 static void discordInit() {
     DiscordEventHandlers handlers;
@@ -163,6 +171,8 @@ static void discordInit() {
     handlers.ready = handleDiscordReady;
     handlers.disconnected = handleDiscordDisconnected;
     handlers.errored = handleDiscordError;
+
+    handlers.spectateGame = handleDiscordSpectate;
 
     Discord_Initialize(APPLICATION_ID, &handlers, 1, nullptr);
 }
@@ -311,7 +321,6 @@ int main(int argc, char **argv) {
     // RPC loop call
     std::thread t1(rpcLoop);
     t1.detach();
-
 
     return app.exec();
 

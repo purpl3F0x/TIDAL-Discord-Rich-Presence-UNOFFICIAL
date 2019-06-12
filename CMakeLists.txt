@@ -21,8 +21,6 @@ set(CMAKE_AUTOUIC ON)
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
-link_directories("C:\\Qt\\5.12.1\\msvc2017\\lib")
-
 
 set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 
