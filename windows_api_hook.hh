@@ -20,27 +20,22 @@
 #pragma comment (lib, "User32.lib")
 
 
-std::string safeWstringToString(const std::wstring &wstr) {
-    std::ostringstream os;
-
-    for (auto &i: wstr) {
-        if (i >= 1 && i <= 255)
-            os << (char) i;
-        else if (i == 0x201C || i == 0x201D)    //  replace “ , ”
-            os << "\"";
-    }
-
-    return os.str();
-}
-
-
+/**
+ * @brier Converts an std::wstring to utr-8 std::string
+ * @param wstr The wstring to be converted
+ * @return The copnverted string
+ */
 inline std::string rawWstringToString(const std::wstring &wstr) {
     return std::wstring_convert<std::codecvt_utf8<wchar_t>>().to_bytes(wstr);
 }
 
 
+/// @brief Enum describing the state of TIDAL app
 enum status { error, closed, opened, playing };
 
+/**
+ * @brief struct to be passed to <enumWindowsProc>
+ */
 struct EnumWindowsProcParam {
   std::vector<DWORD> &pids;
   std::wstring &song;
@@ -58,6 +53,12 @@ inline bool isTIDAL(const PROCESSENTRY32W &entry) {
 }
 
 
+/**
+ * @brief Enums running apps and checks if TIDAL is running and if so if plays a song
+ * @param hwnd
+ * @param lParam <EnumWindowsProcParam> struct
+ * @return returns TRUE if there wsa no error
+ */
 BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
     static const std::wregex rgx(L"(.+) - (?!\\{)(.+)");
     auto &paramRe = *reinterpret_cast<EnumWindowsProcParam *>(lParam);
@@ -86,6 +87,12 @@ BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
 }
 
 
+/**
+ * @brief Checks tidal Info
+ * @param song Track name if tidal is playing else empty string
+ * @param artist Artist name if tidal is playing else empty string
+ * @return returns a <status> struct with current tidal ifno
+ */
 status tidalInfo(std::wstring &song, std::wstring &artist) {
     static std::vector<DWORD> pids;
     static HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -105,7 +112,6 @@ status tidalInfo(std::wstring &song, std::wstring &artist) {
     artist = L"";
 
     EnumWindowsProcParam param(pids, song, artist);
-
     EnumWindows(enumWindowsProc, reinterpret_cast<LPARAM>(&param));
 
     if (param.tidalStatus == closed) {
@@ -116,6 +122,10 @@ status tidalInfo(std::wstring &song, std::wstring &artist) {
 }
 
 
+/**
+ * Gets locale of current user
+ * @return ISO 2 letter formated country code
+ */
 inline char *getLocale() noexcept {
     static char buffer[3];
     GEOID myGEO = GetUserGeoID(GEOCLASS_NATION);

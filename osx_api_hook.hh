@@ -16,27 +16,20 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
 // osx api
 #include <Carbon/Carbon.h>
 
 
-std::string safeWstringToString(const std::wstring &wstr) {
-    std::ostringstream os;
-    for (auto &i: wstr) {
-        if (i <= 255)
-            os << (char) i;
-        else if (i == 0x201C || i == 0x201D)    //  replace “ and ”
-            os << "\"";
-    }
-    return os.str();
-}
-
-
+/**
+ * @brier Converts an std::wstring to utr-8 std::string
+ * @param wstr The wstring to be converted
+ * @return The copnverted string
+ */
 std::string rawWstringToString(const std::wstring &wstr) {
     return std::string(wstr.begin(), wstr.end());
 }
 
+/// @brief Enum describing the state of TIDAL app
 
 enum status { error, closed, opened, playing };
 
@@ -48,6 +41,12 @@ std::wstring ctow(const char *src) {
 }
 
 
+/**
+ * @brief Checks tidal Info
+ * @param song Track name if tidal is playing else empty string
+ * @param artist Artist name if tidal is playing else empty string
+ * @return returns a <status> struct with current tidal ifno
+ */
 status tidalInfo(std::wstring &song, std::wstring &artist) {
     char buffer[512] = "";
     int layer = 0;
@@ -92,6 +91,10 @@ status tidalInfo(std::wstring &song, std::wstring &artist) {
 }
 
 
+/**
+ * Gets locale of current user
+ * @return ISO 2 letter formated country code
+ */
 inline char *getLocale() noexcept {
     char *tmp = new char[2];
     auto localeID = (CFStringRef) CFLocaleGetValue(CFLocaleCopyCurrent(), kCFLocaleCountryCode);
