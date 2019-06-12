@@ -1,12 +1,18 @@
+/**
+ * @file    osx_api_hook.hh
+ * @authors Stavros Avramidis
+ */
+
 
 #pragma  once
 
+// cpp libs
 #include <codecvt>
 #include <regex>
 #include <sstream>
 #include <string>
 #include <vector>
-
+// winapi
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <Winuser.h>
@@ -34,6 +40,7 @@ inline std::string rawWstringToString(const std::wstring &wstr) {
 
 
 enum status { error, closed, opened, playing };
+
 struct EnumWindowsProcParam {
   std::vector<DWORD> &pids;
   std::wstring &song;

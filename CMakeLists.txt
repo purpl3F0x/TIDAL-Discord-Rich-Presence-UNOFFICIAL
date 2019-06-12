@@ -3,12 +3,12 @@ cmake_minimum_required(VERSION 3.10)
 
 project(TIDAL-RPC)
 
+# Create executable
 include_directories(.)
-add_executable(tidal-rpc main.cc)
 
-
-set(CMAKE_PREFIX_PATH "/usr/local/opt/qt5/lib/cmake/Qt5Widgets/")
-
+if (APPLE)
+    set(CMAKE_PREFIX_PATH "/usr/local/opt/qt5/lib/cmake/Qt5Widgets/")
+endif (APPLE)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -17,11 +17,22 @@ set(CMAKE_AUTOMOC ON)
 # Create code from a list of Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
+
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
+find_package(Qt5Network CONFIG REQUIRED)
+
+link_directories("C:\\Qt\\5.12.1\\msvc2017\\lib")
+
 
 set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
-target_link_libraries(tidal-rpc Qt5::Widgets)
+
+qt5_add_resources(QRCS resources.qrc)
+
+add_executable(tidal-rpc main.cc resource.rc ${QRCS})
+
+
+target_link_libraries(tidal-rpc Qt5::Widgets Qt5::Network)
 
 
 # generate proper GUI program on specified platform if on release
