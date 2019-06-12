@@ -27,7 +27,6 @@
 #include <QObject>
 #include <QPushButton>
 #include <QSystemTrayIcon>
-#include <QtNetwork>
 
 /* local libs*/
 #include "discord_rpc.h"

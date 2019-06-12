@@ -20,7 +20,6 @@ set(CMAKE_AUTOUIC ON)
 
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
-find_package(Qt5Network CONFIG REQUIRED)
 
 link_directories("C:\\Qt\\5.12.1\\msvc2017\\lib")
 
@@ -32,7 +31,7 @@ qt5_add_resources(QRCS resources.qrc)
 add_executable(tidal-rpc main.cc resource.rc ${QRCS})
 
 
-target_link_libraries(tidal-rpc Qt5::Widgets Qt5::Network)
+target_link_libraries(tidal-rpc Qt5::Widgets)
 
 
 # generate proper GUI program on specified platform if on release
