@@ -31,7 +31,7 @@ The new version doesn't require connection with last-fm, 'cause I reversed engin
 3.  *Optional*: Place the exe in windows start-up folder to start when computer starts. For OSX select that option from by right clicking the app on taskbar.
 
 
-The program registers an icon on the taskbar, where you can see the song playing and temporary disable *rich presence*.
+The program registers an icon on the taskbar, ~~where you can see the song playing and temporary disable *rich presence*~~.
 
 ![alt text](./assets/taskbar.jpg) ![alt text](./assets/taskbar_opened.png)
 
