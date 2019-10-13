@@ -33,18 +33,19 @@ inline std::string rawWstringToString(const std::wstring &wstr) {
 /// @brief Enum describing the state of TIDAL app
 enum status { error, closed, opened, playing };
 
+
 /**
  * @brief struct to be passed to <enumWindowsProc>
  */
 struct EnumWindowsProcParam {
-  std::vector<DWORD> &pids;
-  std::wstring &song;
-  std::wstring &artist;
-  status tidalStatus = closed;
+    std::vector<DWORD> &pids;
+    std::wstring &song;
+    std::wstring &artist;
+    status tidalStatus = closed;
 
 
-  EnumWindowsProcParam(std::vector<DWORD> &pids, std::wstring &song, std::wstring &artist)
-      : pids(pids), song(song), artist(artist) {}
+    EnumWindowsProcParam(std::vector<DWORD> &pids, std::wstring &song, std::wstring &artist)
+        : pids(pids), song(song), artist(artist) {}
 };
 
 
@@ -67,10 +68,19 @@ BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
 
     for (DWORD pid : (paramRe.pids)) {
         if (winId == pid) {
-            paramRe.tidalStatus = opened;
 
             std::wstring title(GetWindowTextLength(hwnd) + 1, L'\0');
             GetWindowTextW(hwnd, &title[0], title.size()); //note: >=C++11
+
+            if (title.find(L"MSCTFIME UI") == 0
+                || title.find(L"Default IME") == 0
+                || title.find(L"MediaPlayer SMTC window") == 0
+                || title.size() == 1
+                ) {
+                return TRUE;
+            }
+            std::wcout << title << "\n";
+            paramRe.tidalStatus = opened;
 
             std::regex_match(title, rgx);
             std::wsmatch matches;

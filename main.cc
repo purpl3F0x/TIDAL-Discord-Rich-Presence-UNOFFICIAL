@@ -263,6 +263,7 @@ inline void rpcLoop() {
             updateDiscordPresence(curSong);
         } else {
             Discord_ClearPresence();
+            curSong = Song();
         }
         _continue:
 
