@@ -1,4 +1,5 @@
-
+![GitHub All Releases](https://img.shields.io/github/downloads/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/total?style=flat-square)
+![GitHub Releases](https://img.shields.io/github/downloads/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/latest/total?style=flat-square)
 
 ## TIDAL - Discord Rich Presence plug-in  (UNOFFICIAL)
 
