@@ -4,9 +4,8 @@ compiler:
   - clang
   - gcc
   
-os:
-  - osx
-  - windows
+os: osx
+
 
 
 
