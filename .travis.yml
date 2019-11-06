@@ -5,8 +5,8 @@ compiler:
   - gcc
   
 os:
-  -osx
-  -windows
+  - osx
+  - windows
 
 
 
