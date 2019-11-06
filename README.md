@@ -1,3 +1,5 @@
+
+
 ## TIDAL - Discord Rich Presence plug-in  (UNOFFICIAL)
 
 
@@ -5,6 +7,11 @@ Unofficial plug in to obtain Discord Rich Presence.
 
 Feel free to report any bugs or make suggestions.
 
+<br>
+
+**If you like the project and want to buy me a glass of milk :)**
+
+[![Donate](https://www.paypalobjects.com/webstatic/i/logo/rebrand/ppcom.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)
 
 ## Example Screenshot
 
