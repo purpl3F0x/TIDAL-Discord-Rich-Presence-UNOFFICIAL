@@ -4,4 +4,14 @@ compiler:
   - clang
   - gcc
   
-os: osx
+os:
+  -osx
+  -windows
+
+
+
+addons:
+  apt:
+    packages:
+      - cmake-data
+      - cmake
