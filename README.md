@@ -12,7 +12,7 @@ Feel free to report any bugs or make suggestions.
 
 **If you like the project and want to buy me a glass of milk :)**
 
-[![Donate](https://www.paypalobjects.com/webstatic/i/logo/rebrand/ppcom.png)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)
+[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)
 
 ## Example Screenshot
 
