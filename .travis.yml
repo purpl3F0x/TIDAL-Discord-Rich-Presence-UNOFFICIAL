@@ -11,3 +11,7 @@ addons:
     - qt
 
 script: cmake . && make
+    
+after_success:
+  - zip -r tidal-rpc.zip tidal-rpc.app
+  
