@@ -47,7 +47,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
             message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC or GCC)")
         endif (MSVC)
     elseif (APPLE)
-        set_target_properties(tidal-rpc PROPERTIES
+        set_target_properties(${PROJECT_NAME} PROPERTIES
                 MACOSX_BUNDLE YES
                 )
     elseif (UNIX)
@@ -90,7 +90,7 @@ if (WIN32)
 elseif (APPLE)
     message("Building for MacOS")
     include_directories(discord-rpc/osx-static/include)
-    target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/discord-rpc/osx-static/lib/libdiscord-rpc.a)
+    target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/osx-static/lib/libdiscord-rpc.a)
     set(CMAKE_CXX_FLAGS "-framework carbon -framework foundation -framework CoreFoundation")
     set(MACOSX_BUNDLE_BUNDLE_NAME rpc.tidal)
     set(MACOSX_BUNDLE_EXECUTABLE_NAME tidal-rpc)
