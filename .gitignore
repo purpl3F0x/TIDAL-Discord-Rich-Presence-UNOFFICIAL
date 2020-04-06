@@ -1,1 +1,12 @@
 .vscode
+CMakeLists.txt
+icon.ico
+CMakeCache.txt
+CMakeFiles/
+Makefile
+assets/icon.ico
+cmake_install.cmake
+qrc_resources.cpp
+resources.qrc.depends
+tidal-rpc.app/
+tidal-rpc_autogen/
