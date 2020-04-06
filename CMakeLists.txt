@@ -47,7 +47,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
             message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC or GCC)")
         endif (MSVC)
     elseif (APPLE)
-        set_target_properties(${PROJECT_NAME} PROPERTIES
+        set_target_properties(tidal-rpc PROPERTIES
                 MACOSX_BUNDLE YES
                 )
     elseif (UNIX)
