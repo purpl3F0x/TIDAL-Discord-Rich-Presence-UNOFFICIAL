@@ -40,6 +40,16 @@ std::wstring ctow(const char *src) {
     return std::wstring(&dest[0]);
 }
 
+bool macPerms(){
+    CGDisplayStreamRef stream = CGDisplayStreamCreate(CGMainDisplayID(), 1, 1, 'BGRA', nil, ^(CGDisplayStreamFrameStatus status, uint64_t displayTime, IOSurfaceRef frameSurface, CGDisplayStreamUpdateRef updateRef) {});
+    if (stream) {
+        CFRelease(stream);
+        return true;
+    }else{
+        return false;
+    }
+}
+
 
 /**
  * @brief Checks tidal Info
