@@ -15,3 +15,9 @@ script: cmake . && make
 after_success:
   - zip -r tidal-rpc.zip tidal-rpc.app
   
+deploy:
+  provider: releases
+  api_key: $GITHUB_OAUTH_TOKEN
+  file: "tidal-rpc.zip"
+  skip_cleanup: true
+  draft: true
