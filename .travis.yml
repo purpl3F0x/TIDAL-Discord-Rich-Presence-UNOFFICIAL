@@ -1,16 +1,13 @@
 language: cpp
 
 compiler:
-  - clang
-  - gcc
+  - cmake
   
 os: osx
 
-
-
-
 addons:
-  apt:
+  homebrew:
     packages:
-      - cmake-data
-      - cmake
+    - qt
+
+script: cmake . && make
