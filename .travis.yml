@@ -1,17 +1,14 @@
 language: cpp
 
+os: 
+  - osx
+  - windows
+
 compiler:
   - cmake
 
 _anchors:
   - &refreshpath eval $(powershell -NonInteractive -Command 'write("export PATH=`"" + ([Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [Environment]::GetEnvironmentVariable("PATH","User")).replace("\","/").replace("C:","/c").replace(";",":") + ":`$PATH`"")')
-
-jobs:
-  allow_failures:
-    - os: windows
-  include:
-    - os: osx
-    - os: windows
 
 before_install:
   - |-
@@ -52,7 +49,7 @@ addons:
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
       echo $PATH ;
-      cmake . -G "Unix Makefiles" && make ;
+      cmake . -G "Unix Makefiles" && make -d;
       dir ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
