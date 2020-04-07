@@ -52,8 +52,7 @@ addons:
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
       echo $PATH ;
-      cmake . && mingw32-make all -d;
-      cd CMakeFiles ;
+      cmake . -G "NMake Makefiles" && nmake;
       dir ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
