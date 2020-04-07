@@ -17,8 +17,7 @@ after_success:
   
 deploy:
   provider: releases
-  api_key: $GITHUB_OAUTH_TOKEN
+  token: $GITHUB_OAUTH_TOKEN
   file: "tidal-rpc.zip"
-  skip_cleanup: true
-  on:
-    tags: true
+  cleanup: true
+  draft: true
