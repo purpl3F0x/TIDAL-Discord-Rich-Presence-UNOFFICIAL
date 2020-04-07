@@ -40,12 +40,28 @@ std::wstring ctow(const char *src) {
     return std::wstring(&dest[0]);
 }
 
-bool macPerms(){
-    CGDisplayStreamRef stream = CGDisplayStreamCreate(CGMainDisplayID(), 1, 1, 'BGRA', nil, ^(CGDisplayStreamFrameStatus status, uint64_t displayTime, IOSurfaceRef frameSurface, CGDisplayStreamUpdateRef updateRef) {});
+
+/**
+ * Attempting to get a Stream of the screen triggering the Screen Recording Permission window on macOS Catalina
+ * @return Bool showing presence of permissions for screen recording
+ */
+bool macPerms() {
+    CGDisplayStreamRef stream = CGDisplayStreamCreate(
+        CGMainDisplayID(),
+        1,
+        1,
+        'BGRA',
+        nil,
+        ^(CGDisplayStreamFrameStatus status,
+          uint64_t displayTime,
+          IOSurfaceRef frameSurface,
+          CGDisplayStreamUpdateRef updateRef) {}
+    );
+
     if (stream) {
         CFRelease(stream);
         return true;
-    }else{
+    } else {
         return false;
     }
 }

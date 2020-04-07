@@ -1,3 +1,4 @@
+.idea/
 .vscode
 CMakeLists.txt
 CMakeCache.txt
@@ -8,3 +9,7 @@ qrc_resources.cpp
 resources.qrc.depends
 tidal-rpc.app/
 tidal-rpc_autogen/
+/.vs/
+/cmake-build-*/
+/tidal-rpc.pro.user
+/.idea/
