@@ -3,9 +3,12 @@ language: cpp
 compiler:
   - cmake
 
-os:
-  - osx
-  - windows
+jobs:
+  allow_failures:
+    - os: windows
+  include:
+    - os: osx
+    - os: windows
 
 before_install:
   - |-
