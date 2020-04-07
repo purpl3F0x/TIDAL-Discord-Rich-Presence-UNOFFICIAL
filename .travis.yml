@@ -65,7 +65,7 @@ after_success:
       zip -r tidal-rpc-osx.zip tidal-rpc.app ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      zip -r tidal-rpc-win.zip tidal-rpc.exe ;
+      zip -r tidal-rpc-win.zip . ;
     fi
 
 deploy:
