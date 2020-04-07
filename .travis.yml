@@ -1,11 +1,16 @@
 language: cpp
 
-compiler:
-  - cmake
+#compiler:
+#  - cmake
 
-os:
-  - osx
-  - windows
+jobs:
+  allow_failures:
+    - os: windows
+  include:
+    - os: linux
+      compiler: cmake
+    - os: windows
+      compiler: gcc
 
 before_install:
   - |-
@@ -49,7 +54,7 @@ addons:
 
 script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cmake . && make ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ];then  cmake . -G "MSYS Makefiles" && make; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ];then  cmake . -G "MSYS Makefiles" && make;  fi
 
 after_success:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app     ; fi
