@@ -45,7 +45,7 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-      cmake . -G "NMake Makefiles" && nmake /D /P ;
+      cmake . && msbuild TIDAL-RPC.sln ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       cmake . && make ;
