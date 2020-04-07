@@ -1,8 +1,6 @@
-![GitHub All Releases](https://img.shields.io/github/downloads/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/total?style=flat-square)
-![GitHub Releases](https://img.shields.io/github/downloads/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/latest/total?style=flat-square)
-
-## TIDAL - Discord Rich Presence plug-in  (UNOFFICIAL)
-
+## TIDAL - Discord Rich Presence plug-in (seb edit)
+![GitHub All Releases](https://img.shields.io/github/downloads/sebdroid/TIDAL-Discord-Rich-Presence-UNOFFICIAL/total?style=flat-square)
+[![Build Status](https://travis-ci.com/sebdroid/TIDAL-Discord-Rich-Presence-UNOFFICIAL.svg?branch=master)](https://travis-ci.com/sebdroid/TIDAL-Discord-Rich-Presence-UNOFFICIAL)
 
 Unofficial plug in to obtain Discord Rich Presence.
 
@@ -31,7 +29,7 @@ or you have paused playback
 ## Instructions
 The new version doesn't require connection with last-fm, 'cause I reversed engineered TIDAL API,  get the data from the window name of the app.
 
-1.  Download the latest release from [here](https://github.com/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/releases)
+1.  Download the latest release from [here](https://github.com/sebdroid/TIDAL-Discord-Rich-Presence-UNOFFICIAL/releases)
 (windows and osx are supported).
 
 2.  Run the binary, enjoy.
@@ -55,8 +53,10 @@ Kudos to:
 + https://github.com/nlohmann/json
 + https://github.com/yhirose/cpp-httplib
 
++ https://github.com/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL (the original)
+
 for their awesome work.
 
 
 
-> ### Stavros Avramidis Never Settle & Keep Running
+> ### Seb Jose
