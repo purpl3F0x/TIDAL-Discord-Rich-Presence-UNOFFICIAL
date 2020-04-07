@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
 
-project(TIDAL-RPC)
+project(tidal-rpc)
 
 # Create executable
 include_directories(.)
