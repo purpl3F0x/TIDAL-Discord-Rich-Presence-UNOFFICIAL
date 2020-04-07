@@ -46,17 +46,16 @@ addons:
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
       cmake -D CMAKE_C_COMPILER="C:/tools/msys64/mingw64/bin/gcc.exe" -D CMAKE_MAKE_PROGRAM="C:/tools/msys64/mingw64/bin/mingw32-make.exe" -D CMAKE_CXX_COMPILER="C:/tools/msys64/mingw64/bin/g++.exe" -G "Unix Makefiles" . && mingw32-make ;
-      dir ;
     fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then 
       cmake . && make ;
     fi
 
 after_success:
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then 
       zip -r tidal-rpc-osx.zip . ;
     fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+  - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
       powershell -Command "Compress-Archive tidal-rpc.exe tidal-rpc-win.zip" ;
     fi
 
