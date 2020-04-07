@@ -48,12 +48,11 @@ addons:
       - qt
 
 script:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cmake . && make ; fi
-    elif [ "$TRAVIS_OS_NAME" = "windows" ] then 
+  - if [ "$TRAVIS_OS_NAME" = "windows" ] then 
       export PATH=/C/tools/msys64/mingw64/bin:$PATH ;
       export MAKE=mingw32-make ;
-      cmake . && make ;
     fi
+  - cmake . && make
 
 after_success:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app ; fi
