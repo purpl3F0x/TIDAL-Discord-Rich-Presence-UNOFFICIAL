@@ -48,8 +48,8 @@ addons:
       - qt
 
 script:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; cmake . && make   ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; cmake . -G "MSYS Makefiles" && make ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; cmake . && make ;
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; cmake . -G "MSYS Makefiles" && make;
 
 after_success:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app     ; fi
