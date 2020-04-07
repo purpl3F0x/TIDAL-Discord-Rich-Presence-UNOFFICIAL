@@ -1,11 +1,16 @@
 language: cpp
 
-compiler:
-  - cmake
+#compiler:
+#  - cmake
 
-os:
-  - osx
-  - windows
+jobs:
+  allow_failures:
+    - os: windows
+  include:
+    - os: osx
+      compiler: cmake
+    - os: windows
+      compiler: gcc
 
 before_install:
   - |-
