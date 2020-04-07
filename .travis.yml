@@ -52,9 +52,7 @@ addons:
     packages:
       - qt
 
-script:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cmake . && make ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ];then  cmake . -G "MSYS Makefiles" && make;  fi
+script: cmake . && make
 
 after_success:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app     ; fi
