@@ -30,9 +30,8 @@ before_install:
     esac
 
 before_cache:
-  - if [ "$TRAVIS_OS_NAME" = "windows" ] 
-    then
-        $msys2 pacman --sync --clean --noconfirm ;
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
+      $msys2 pacman --sync --clean --noconfirm ;
     fi
 
 cache:
@@ -46,20 +45,17 @@ addons:
       - qt
 
 script:
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]
-    then 
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       export PATH=/C/tools/msys64/mingw64/bin:$PATH ;
       export MAKE=mingw32-make ;
     fi
   - cmake . && make
 
 after_success:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]
-    then 
+  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       zip -r tidal-rpc-osx.zip tidal-rpc.app ;
     fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]
-    then
+  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       zip -r tidal-rpc-win.zip tidal-rpc.exe ;
     fi
 
