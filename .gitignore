@@ -1,4 +1,3 @@
-.idea/
 .vscode
 CMakeLists.txt
 CMakeCache.txt
@@ -12,4 +11,3 @@ tidal-rpc_autogen/
 /.vs/
 /cmake-build-*/
 /tidal-rpc.pro.user
-/.idea/

@@ -42,7 +42,7 @@ if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
                     LINK_FLAGS "/ENTRY:mainCRTStartup"
                     )
         elseif (CMAKE_COMPILER_IS_GNUCXX)
-            # SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -mwindows") # Not tested
+            SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS_RELEASE} -mwindows") # Not tested
         else ()
             message(SEND_ERROR "You are using an unsupported Windows compiler! (Not MSVC or GCC)")
         endif (MSVC)
@@ -63,6 +63,7 @@ if (WIN32)
     if (MSVC)
         STRING(REPLACE "/Od" "/O2" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
     else ()
+        target_link_libraries(tidal-rpc wsock32 ws2_32)
         set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
     endif ()
 
@@ -72,7 +73,10 @@ if (WIN32)
         # 64 bits
         message("\t64-bit")
         target_include_directories(tidal-rpc PRIVATE discord-rpc/win64-static/include)
-        target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/win64-static/lib/discord-rpc.lib)
+        target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-rpc/win64-dynamic/lib/discord-rpc.lib)
+
+        configure_file(${CMAKE_SOURCE_DIR}/discord-rpc/win64-dynamic/bin/discord-rpc.dll ${CMAKE_BINARY_DIR}/discord-rpc.dll COPYONLY)
+
 
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         # 32 bits
@@ -80,10 +84,12 @@ if (WIN32)
         if (CMAKE_BUILD_TYPE STREQUAL "Debug")
             message("\tRunning on debug mode")
             target_include_directories(tidal-rpc PRIVATE discord-rpc/win32-dynamic/include)
-            target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/win32-dynamic/lib/discord-rpc.lib)
+            target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-rpc/win32-dynamic/lib/discord-rpc.lib)
+            configure_file(${CMAKE_SOURCE_DIR}/discord-rpc/win32-dynamic/bin/discord-rpc.dll ${CMAKE_BINARY_DIR}/discord-rpc.dll
+                    COPYONLY)
         else (CMAKE_BUILD_TYPE STREQUAL "Debug")
             target_include_directories(tidal-rpc PRIVATE discord-rpc/win32-static/include)
-            target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/../discord-rpc/win32-static/lib/discord-rpc.lib)
+            target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-rpc/win32-static/lib/discord-rpc.lib)
         endif ()
     endif ()
 
