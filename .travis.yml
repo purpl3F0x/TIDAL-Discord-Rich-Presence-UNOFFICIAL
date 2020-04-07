@@ -48,8 +48,8 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-      export PATH="C:/tools/msys64/mingw64/bin":$PATH
-      export MAKE="mingw32-make"  # so that Autotools can find it
+      export PATH="C:/tools/msys64/mingw64/bin":$PATH ;
+      export MAKE="mingw32-make" ;
       cmake . &&  make ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
