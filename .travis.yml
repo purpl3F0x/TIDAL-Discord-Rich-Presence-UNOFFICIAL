@@ -49,12 +49,6 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-      echo "hello windows";
-    fi
-  - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then
-      echo "hello mac";
-    fi
-  - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       export PATH=/C/tools/msys64/mingw64/bin:$PATH ;
       export make=mingw32-make.exe ;
       echo $make ;
