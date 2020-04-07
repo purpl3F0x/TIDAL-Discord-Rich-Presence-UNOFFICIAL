@@ -45,7 +45,7 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-      cmake . -G "Unix Makefiles" && make --debug ;
+      cmake . -G "Unix Makefiles" && mingw32-make --debug ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       cmake . && make ;
