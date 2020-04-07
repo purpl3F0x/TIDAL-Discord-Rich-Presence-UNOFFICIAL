@@ -49,11 +49,11 @@ addons:
 
 script:
   - if [ "$TRAVIS_OS_NAME" = "osx" ]; then cmake . && make ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ];then  cmake . -G "MSYS Makefiles" && make; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then  cmake . -G "MSYS Makefiles" && make ; fi
 
 after_success:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then zip -r tidal-rpc-win.zip tidal-rpc.exe; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app ; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then zip -r tidal-rpc-win.zip tidal-rpc.exe ; fi
 
 deploy:
   provider: releases
