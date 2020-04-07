@@ -27,7 +27,7 @@ before_install:
         $msys2 pacman --noconfirm -S mingw-w64-x86_64-qt5
         $msys2 pacman --noconfirm -S mingw-w64-x86_64-cmake
         export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        export MAKE=mingw32-make  # so that Autotools can find it
+        export MAKE="mingw32-make"  # so that Autotools can find it
         ;;
     esac
 
@@ -48,7 +48,9 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-      cmake . && dir "C:/tools/msys64/mingw64/bin" ;
+      export PATH="C:/tools/msys64/mingw64/bin":$PATH
+      export MAKE="mingw32-make"  # so that Autotools can find it
+      cmake . &&  make ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       cmake . && make ;
