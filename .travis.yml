@@ -3,6 +3,9 @@ language: cpp
 compiler:
   - cmake
 
+_anchors:
+  - &refreshpath eval $(powershell -NonInteractive -Command 'write("export PATH=`"" + ([Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [Environment]::GetEnvironmentVariable("PATH","User")).replace("\","/").replace("C:","/c").replace(";",":") + ":`$PATH`"")')
+
 jobs:
   allow_failures:
     - os: windows
@@ -28,7 +31,6 @@ before_install:
         $msys2 pacman --noconfirm -S mingw-w64-x86_64-cmake
         export PATH=/C/tools/msys64/mingw64/bin:$PATH
         export MAKE="mingw32-make"  # so that Autotools can find it
-        export msys2='cmd //C RefreshEnv.cmd '
         ;;
     esac
 
@@ -52,7 +54,8 @@ script:
       PATH=$PATH:/c/tools/msys64/mingw64/bin ;
       export PATH ;
       echo $PATH ;
-      cmake . && mingw32-make;
+      *refreshpath ;
+      cmake . ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       cmake . && make ;
