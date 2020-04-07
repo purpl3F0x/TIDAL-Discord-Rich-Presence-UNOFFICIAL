@@ -55,7 +55,8 @@ script:
       export PATH ;
       echo $PATH ;
       *refreshpath ;
-      cmake . ;
+      cmake . && mingw32-make ;
+      dir ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       cmake . ;
