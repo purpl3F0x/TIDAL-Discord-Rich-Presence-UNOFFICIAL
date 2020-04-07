@@ -58,7 +58,7 @@ script:
       cmake . ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      cmake . && make ;
+      cmake . ;
     fi
 
 after_success:
