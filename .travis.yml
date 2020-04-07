@@ -48,7 +48,9 @@ addons:
       - qt
 
 script:
-  - echo $TRAVIS_OS_NAME
+  - if [$TRAVIS_OS_NAME == "windows" ]]; then
+      echo "hello"
+    fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       export PATH=/C/tools/msys64/mingw64/bin:$PATH ;
       export make=mingw32-make.exe ;
