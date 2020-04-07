@@ -47,7 +47,8 @@ addons:
 script:
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
       export PATH=/C/tools/msys64/mingw64/bin:$PATH ;
-      export MAKE=mingw32-make ;
+      export make=mingw32-make ;
+      echo $make
     fi
   - cmake . && make
 
