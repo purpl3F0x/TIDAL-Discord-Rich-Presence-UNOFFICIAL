@@ -318,6 +318,14 @@ int main(int argc, char **argv) {
 
     tray.show();
 
+    #if defined(__APPLE__) or defined(__MACH__)
+
+        if (!macPerms()){
+            std::cerr << "No Screen Recording Perms \n";
+        }
+    
+    #endif
+
     discordInit();
     // RPC loop call
     std::thread t1(rpcLoop);

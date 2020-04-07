@@ -1,0 +1,10 @@
+.vscode
+CMakeLists.txt
+CMakeCache.txt
+CMakeFiles/
+Makefile
+cmake_install.cmake
+qrc_resources.cpp
+resources.qrc.depends
+tidal-rpc.app/
+tidal-rpc_autogen/
