@@ -7,9 +7,6 @@ os:
 compiler:
   - cmake
 
-_anchors:
-  - &refreshpath eval $(powershell -NonInteractive -Command 'write("export PATH=`"" + ([Environment]::GetEnvironmentVariable("PATH","Machine") + ";" + [Environment]::GetEnvironmentVariable("PATH","User")).replace("\","/").replace("C:","/c").replace(";",":") + ":`$PATH`"")')
-
 before_install:
   - |-
     case $TRAVIS_OS_NAME in
@@ -48,9 +45,7 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-      echo $PATH ;
-      cmake . -G "Unix Makefiles" && make -d;
-      dir ;
+      cmake . -G "Unix Makefiles" && make -d ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
       cmake . && make ;
