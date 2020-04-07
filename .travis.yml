@@ -53,7 +53,7 @@ script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
       echo $PATH ;
       *refreshpath ;
-      cmake . && make all ;
+      cmake . && mingw32-make all ;
       dir ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
