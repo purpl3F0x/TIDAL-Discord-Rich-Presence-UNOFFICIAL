@@ -30,12 +30,11 @@ before_install:
     esac
 
 before_cache:
-  - |-
-    case $TRAVIS_OS_NAME in windows)
+  - if [ "$TRAVIS_OS_NAME" = "windows" ] then 
         # https://unix.stackexchange.com/a/137322/107554
         $msys2 pacman --sync --clean --noconfirm
         ;;
-    esac
+    fi
 
 cache:
   directories:
@@ -49,14 +48,14 @@ addons:
 
 script:
   - if [ "$TRAVIS_OS_NAME" = "windows" ] then 
-      export PATH=/C/tools/msys64/mingw64/bin:$PATH ;
-      export MAKE=mingw32-make ;
+      export PATH=/C/tools/msys64/mingw64/bin:$PATH ;;
+      export MAKE=mingw32-make ;;
     fi
   - cmake . && make
 
 after_success:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then zip -r tidal-rpc-win.zip tidal-rpc.exe ; fi
+  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app ;; fi
+  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then zip -r tidal-rpc-win.zip tidal-rpc.exe ;; fi
 
 deploy:
   provider: releases
