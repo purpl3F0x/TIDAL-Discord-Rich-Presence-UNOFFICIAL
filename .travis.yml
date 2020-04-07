@@ -58,10 +58,10 @@ script:
 
 after_success:
   - if [[ "$TRAVIS_OS_NAME" == "osx" ]]; then 
-      powershell -Command "Compress-Archive . tidal-rpc-win.zip" ;
+      zip -r tidal-rpc-win.zip . ;
     fi
   - if [[ "$TRAVIS_OS_NAME" == "windows" ]]; then
-      zip -r tidal-rpc-win.zip . ;
+      powershell -Command "Compress-Archive . tidal-rpc-win.zip"
     fi
 
 deploy:
