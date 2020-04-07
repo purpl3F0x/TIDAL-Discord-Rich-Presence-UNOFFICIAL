@@ -1,5 +1,5 @@
 /**
- * @file    osx_api_hook.hh
+ * @file    windows_api_hook.hh
  * @authors Stavros Avramidis
  */
 
