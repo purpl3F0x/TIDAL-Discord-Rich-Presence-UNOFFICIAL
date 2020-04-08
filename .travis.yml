@@ -55,11 +55,8 @@ after_success:
     zip -r tidal-rpc-osx.zip . ;
     fi
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    powershell -Command "mkdir Output"
-    powershell -Command "move "tidal-rpc.exe ./Output"
-    powershell -Command "cd ./Output"
-    powershell -Command "windeployqt tidal-rpc.exe --release"
-    powershell -Command "Compress-Archive * tidal-rpc-win.zip" ;
+    powershell -Command "mkdir Output ;"move "tidal-rpc.exe ./Output ;cd ./Output ;windeployqt tidal-rpc.exe --release ;
+    Compress-Archive * tidal-rpc-win.zip ; move tidal-rpc-win.zip ./.." ;
     fi
 
 deploy:
