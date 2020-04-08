@@ -1,16 +1,11 @@
 language: cpp
 
-#compiler:
-#  - cmake
+os:
+  - osx
+  - windows
 
-jobs:
-  allow_failures:
-    - os: windows
-  include:
-    - os: osx
-      compiler: cmake
-    - os: windows
-      compiler: gcc
+compiler:
+  - cmake
 
 before_install:
   - |-
@@ -28,19 +23,14 @@ before_install:
         ## Install more MSYS2 packages from https://packages.msys2.org/base here
         $msys2 pacman --noconfirm -S mingw-w64-x86_64-qt5
         $msys2 pacman --noconfirm -S mingw-w64-x86_64-cmake
-        taskkill //IM gpg-agent.exe //F  # https://travis-ci.community/t/4967
         export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        export MAKE=mingw32-make  # so that Autotools can find it
+        export MAKE="mingw32-make"  # so that Autotools can find it
         ;;
     esac
-
 before_cache:
-  - |-
-    case $TRAVIS_OS_NAME in windows)
-        # https://unix.stackexchange.com/a/137322/107554
-        $msys2 pacman --sync --clean --noconfirm
-        ;;
-    esac
+  - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    $msys2 pacman --sync --clean --noconfirm ;
+    fi
 
 cache:
   directories:
@@ -52,11 +42,25 @@ addons:
     packages:
       - qt
 
-script: cmake . && make
+script:
+  - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    cmake -D CMAKE_C_COMPILER="C:/tools/msys64/mingw64/bin/gcc.exe" -D CMAKE_MAKE_PROGRAM="C:/tools/msys64/mingw64/bin/mingw32-make.exe" -D CMAKE_CXX_COMPILER="C:/tools/msys64/mingw64/bin/g++.exe" -G "Unix Makefiles" . && mingw32-make ;
+    fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    cmake . && make ;
+    fi
 
 after_success:
-  - if [ "$TRAVIS_OS_NAME" = "osx" ]; then zip -r tidal-rpc-osx.zip tidal-rpc.app     ; fi
-  - if [ "$TRAVIS_OS_NAME" = "windows" ]; then zip -r tidal-rpc-win.zip tidal-rpc.exe ; fi
+  - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
+    zip -r tidal-rpc-osx.zip . ;
+    fi
+  - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
+    powershell -Command "mkdir Output" ;
+    powershell -Command "move "tidal-rpc.exe ./Output" ;
+    powershell -Command "cd ./Output" ;
+    powershell -Command "windeployqt tidal-rpc.exe --release" ;
+    powershell -Command "Compress-Archive * tidal-rpc-win.zip" ;
+    fi
 
 deploy:
   provider: releases
