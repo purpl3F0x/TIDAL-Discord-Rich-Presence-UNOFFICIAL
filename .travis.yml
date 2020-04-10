@@ -58,7 +58,7 @@ after_success:
   - powershell -Command "mkdir Output ;"move "tidal-rpc.exe ./Output ;cd ./Output  "
   - windeployqt  tidal-rpc.exe
   - powershell -Command "ls ; Compress-Archive * tidal-rpc-win.zip ; move tidal-rpc-win.zip ./.."
-    ;fi
+    fi
 
 deploy:
   provider: releases
