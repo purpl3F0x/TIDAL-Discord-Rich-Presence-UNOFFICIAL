@@ -126,23 +126,23 @@ static void updateDiscordPresence(const Song &song) {
         memset(&activity, 0, sizeof(activity));
         activity.type = DiscordActivityType_Listening;
         activity.application_id = APPLICATION_ID;
-        strncpy_s(activity.details, 128, song.title.c_str(), 128);
-        strncpy_s(activity.state, 128, (song.artist + " - " + song.album).c_str(), 128);
+        snprintf(activity.details, 128, "%s", song.title.c_str());
+        snprintf(activity.state, 128, "%s", (song.artist + " - " + song.album).c_str());
 
         struct DiscordActivityAssets assets{};
         memset(&assets, 0, sizeof(assets));
         if (song.isPaused) {
-            strncpy_s(assets.small_image, 128, "pause", 128);
-            strncpy_s(assets.small_text, 128, "Paused", 128);
+            snprintf(assets.small_image, 128, "%s", "pause");
+            snprintf(assets.small_text, 128, "%s", "Paused");
         } else {
             activity.timestamps = timestamps;
         }
-        strncpy_s(assets.large_image, 128, song.isHighRes() ? "test" : HIFI_ASSET, 128);
-        strncpy_s(assets.large_text, 128, song.isHighRes() ? "Playing High-Res Audio" : "", 128);
+        snprintf(assets.large_image, 128, "%s", song.isHighRes() ? "test" : HIFI_ASSET);
+        snprintf(assets.large_text, 128, "%s", song.isHighRes() ? "Playing High-Res Audio" : "");
         if (song.id[0] != '\0') {
             struct DiscordActivitySecrets secrets{};
             memset(&secrets, 0, sizeof(secrets));
-            strncpy_s(secrets.join, 128, song.id, 128);
+            snprintf(secrets.join, 128, "%s", song.id);
             activity.secrets = secrets;
         }
         activity.assets = assets;
