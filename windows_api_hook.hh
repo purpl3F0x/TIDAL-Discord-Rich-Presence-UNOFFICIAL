@@ -79,7 +79,6 @@ BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
                 ) {
                 return TRUE;
             }
-            std::wcout << title << "\n";
             paramRe.tidalStatus = opened;
 
             std::regex_match(title, rgx);

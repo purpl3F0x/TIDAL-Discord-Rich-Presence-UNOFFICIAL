@@ -17,7 +17,6 @@ set(CMAKE_AUTOMOC ON)
 # Create code from a list of Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
-
 # Find the QtWidgets library
 find_package(Qt5Widgets CONFIG REQUIRED)
 
@@ -72,31 +71,24 @@ if (WIN32)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits
         message("\t64-bit")
-        target_include_directories(tidal-rpc PRIVATE discord-rpc/win64-static/include)
-        target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-rpc/win64-dynamic/lib/discord-rpc.lib)
+        target_include_directories(tidal-rpc PRIVATE discord-game-sdk/c)
+        target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dll.lib)
 
-        configure_file(${CMAKE_SOURCE_DIR}/discord-rpc/win64-dynamic/bin/discord-rpc.dll ${CMAKE_BINARY_DIR}/discord-rpc.dll COPYONLY)
-
+        configure_file(${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dll ${CMAKE_BINARY_DIR}/discord_game_sdk.dll COPYONLY)
 
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         # 32 bits
         message("\t32-bit")
-        if (CMAKE_BUILD_TYPE STREQUAL "Debug")
-            message("\tRunning on debug mode")
-            target_include_directories(tidal-rpc PRIVATE discord-rpc/win32-dynamic/include)
-            target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-rpc/win32-dynamic/lib/discord-rpc.lib)
-            configure_file(${CMAKE_SOURCE_DIR}/discord-rpc/win32-dynamic/bin/discord-rpc.dll ${CMAKE_BINARY_DIR}/discord-rpc.dll
-                    COPYONLY)
-        else (CMAKE_BUILD_TYPE STREQUAL "Debug")
-            target_include_directories(tidal-rpc PRIVATE discord-rpc/win32-static/include)
-            target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-rpc/win32-static/lib/discord-rpc.lib)
-        endif ()
+        target_include_directories(tidal-rpc PRIVATE discord-game-sdk/c)
+        target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86/discord_game_sdk.dll.lib)
+
+        configure_file(${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86/discord_game_sdk.dll ${CMAKE_BINARY_DIR}/discord_game_sdk.dll COPYONLY)
     endif ()
 
 elseif (APPLE)
     message("Building for MacOS")
-    include_directories(discord-rpc/osx-static/include)
-    target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/discord-rpc/osx-static/lib/libdiscord-rpc.a)
+    include_directories(discord-game-sdk/c)
+    target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dylib)
     set(CMAKE_CXX_FLAGS "-framework carbon -framework foundation -framework CoreFoundation")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fast-math")
     set(MACOSX_BUNDLE_BUNDLE_NAME rpc.tidal)
