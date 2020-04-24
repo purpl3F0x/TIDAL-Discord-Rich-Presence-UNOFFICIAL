@@ -43,6 +43,10 @@ The program registers an icon on the taskbar, ~~where you can see the song playi
 
 ![alt text](./assets/taskbar.jpg) ![alt text](./assets/taskbar_opened.png)
 
+P.S. Remember to make sure you have Game Activity enabled!
+
+![example of Game Activity tab inside of Discord Settings](https://user-images.githubusercontent.com/3516420/80171200-53356280-85af-11ea-8a51-66b3780250be.png)
+
 
 ## Build Instructions
 
