@@ -55,8 +55,17 @@ after_success:
     zip -r tidal-rpc-osx.zip tidal-rpc.app;
     fi
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-  - windeployqt  tidal-rpc.exe
-  - powershell -Command "ls ; Get-ChildItem -Path *.exe , *.dll , ../*/imageformats* , ../*/platforms , ../*/styles , ./LICENSE  | Compress-Archive -DestinationPath tidal-rpc-win.zip -Force"
+  - windeployqt  tidal-rpc.exe;
+  - mkdir Release;
+  - copy *.exe  Release;
+  - copy *.dll Release;
+  - echo D | xcopy /s imageformats "Release/imageformats";
+  - echo D | xcopy /s platforms "Release/platforms";
+  - echo D | xcopy /s styles "Release/styles";
+  - copy LICENSE Release;
+  - cd Release;
+  - 7z  a -tzip "tidal-rpc-win.zip";
+  - copy tidal-rpc-win.zip ..
     fi
 
 deploy:
