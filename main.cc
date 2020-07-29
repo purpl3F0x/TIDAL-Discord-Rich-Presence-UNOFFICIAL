@@ -8,6 +8,7 @@
 #include <atomic>
 #include <cctype>
 #include <chrono>
+#include <locale>
 #include <iomanip>
 #include <iostream>
 #include <string>
@@ -49,43 +50,44 @@ static char *countryCode = nullptr;
 static std::string currentStatus;
 static std::mutex currentSongMutex;
 
+
 struct Song {
-  enum AudioQualityEnum { master, hifi, normal };
-  std::string title;
-  std::string artist;
-  std::string album;
-  std::string url;
-  char id[10];
-  int64_t starttime;
-  int64_t runtime;
-  uint64_t pausedtime;
-  uint_fast8_t trackNumber;
-  uint_fast8_t volumeNumber;
-  bool isPaused = false;
-  AudioQualityEnum quality;
-  bool loaded = false;
-
-  void setQuality(const std::string &q) {
-      if (q == "HI_RES") {
-          quality = master;
-      } else {
-          quality = hifi;
-      }
-  }
+    enum AudioQualityEnum { master, hifi, normal };
+    std::string title;
+    std::string artist;
+    std::string album;
+    std::string url;
+    char id[10];
+    int64_t starttime;
+    int64_t runtime;
+    uint64_t pausedtime;
+    uint_fast8_t trackNumber;
+    uint_fast8_t volumeNumber;
+    bool isPaused = false;
+    AudioQualityEnum quality;
+    bool loaded = false;
 
 
-  inline bool isHighRes() const noexcept {
-      return quality == master;
-  }
+    void setQuality(const std::string &q) {
+        if (q == "HI_RES") {
+            quality = master;
+        } else {
+            quality = hifi;
+        }
+    }
 
 
-  friend std::ostream &operator<<(std::ostream &out, const Song &song) {
-      out << song.title << " of " << song.album << " from " << song.artist << "(" << song.runtime << ")";
-      return out;
-  }
+    inline bool isHighRes() const noexcept {
+        return quality == master;
+    }
+
+
+    friend std::ostream &operator<<(std::ostream &out, const Song &song) {
+        out << song.title << " of " << song.album << " from " << song.artist << "(" << song.runtime << ")";
+        return out;
+    }
 };
 
-#include <locale>
 
 
 std::string urlEncode(const std::string &value) {
@@ -105,24 +107,27 @@ std::string urlEncode(const std::string &value) {
     return escaped.str();
 }
 
+
 struct Application {
-    struct IDiscordCore* core;
-    struct IDiscordUsers* users;
+    struct IDiscordCore *core;
+    struct IDiscordUsers *users;
 };
 
 struct Application app;
 
+
 static void updateDiscordPresence(const Song &song) {
     struct IDiscordActivityManager *manager = app.core->get_activity_manager(app.core);
+
     if (isPresenceActive && song.loaded) {
-        struct DiscordActivityTimestamps timestamps {};
+        struct DiscordActivityTimestamps timestamps{};
         memset(&timestamps, 0, sizeof(timestamps));
         if (song.runtime) {
             timestamps.end = song.starttime + song.runtime + song.pausedtime;
         }
         timestamps.start = song.starttime;
 
-        struct DiscordActivity activity{};
+        struct DiscordActivity activity{DiscordActivityType_Listening};
         memset(&activity, 0, sizeof(activity));
         activity.type = DiscordActivityType_Listening;
         activity.application_id = APPLICATION_ID;
@@ -151,9 +156,11 @@ static void updateDiscordPresence(const Song &song) {
 
         manager->update_activity(manager, &activity, nullptr, nullptr);
     } else {
+        std::cout << "Clearing activity" << std::endl;
         manager->clear_activity(manager, nullptr, nullptr);
     }
 }
+
 
 static void discordInit() {
     memset(&app, 0, sizeof(app));
@@ -206,7 +213,7 @@ static void discordInit() {
 
                     // get info form TIDAL api
                     auto search_param =
-                            std::string(curSong.title + " - " + curSong.artist.substr(0, curSong.artist.find('&')));
+                        std::string(curSong.title + " - " + curSong.artist.substr(0, curSong.artist.find('&')));
 
                     sprintf(getSongInfoBuf,
                             "/v1/search?query=%s&limit=50&offset=0&types=TRACKS&countryCode=%s",
@@ -215,7 +222,7 @@ static void discordInit() {
                     std::clog << "Querying :" << getSongInfoBuf << "\n";
 
                     httplib::Headers headers = {{
-                                                        "x-tidal-token", "kgsOOmYk3zShYrNP"
+                                                    "x-tidal-token", "CzET4vdadNUFQ5JU"
                                                 }};
                     auto res = cli.Get(getSongInfoBuf, headers);
 
@@ -231,7 +238,7 @@ static void discordInit() {
                                 if (fetched_str == c_str) {
                                     if (curSong.runtime == 0
                                         or j["tracks"]["items"][i]["audioQuality"].get<std::string>().compare("HI_RES")
-                                           == 0) {     // Ignore songs with same name if you have found song
+                                            == 0) {     // Ignore songs with same name if you have found song
                                         curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
                                         curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
                                         curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
@@ -297,6 +304,7 @@ static void discordInit() {
     }
 }
 
+
 int main(int argc, char **argv) {
 
     // get country code for TIDAL api queries
@@ -343,21 +351,21 @@ int main(int argc, char **argv) {
 
     #if defined(__APPLE__) or defined(__MACH__)
 
-        if (!macPerms()){
-            std::cerr << "No Screen Recording Perms \n";
-        }
-    
+    if (!macPerms()){
+        std::cerr << "No Screen Recording Perms \n";
+    }
+
     #endif
 
     QTimer timer(&app);
     QObject::connect(&timer, &QTimer::timeout, &app, [&currentlyPlayingAction]() {
-        std::lock_guard<std::mutex> lock(currentSongMutex);
-        currentlyPlayingAction.setText("Status: " + QString(currentStatus.c_str()));
+      std::lock_guard<std::mutex> lock(currentSongMutex);
+      currentlyPlayingAction.setText("Status: " + QString(currentStatus.c_str()));
     });
     timer.start(1000);
 
     QObject::connect(&app, &QApplication::aboutToQuit, [&timer]() {
-        timer.stop();
+      timer.stop();
     });
 
     discordInit();
