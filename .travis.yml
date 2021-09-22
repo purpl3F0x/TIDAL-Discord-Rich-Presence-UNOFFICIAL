@@ -8,34 +8,11 @@ compiler:
   - cmake
 
 before_install:
-  - |-
-    case $TRAVIS_OS_NAME in
-      windows)
-        [[ ! -f C:/tools/msys64/msys2_shell.cmd ]] && rm -rf C:/tools/msys64
-        choco uninstall -y mingw
-        choco upgrade --no-progress -y msys2
-        export msys2='cmd //C RefreshEnv.cmd '
-        export msys2+='& set MSYS=winsymlinks:nativestrict '
-        export msys2+='& C:\\tools\\msys64\\msys2_shell.cmd -defterm -no-start'
-        export mingw64="$msys2 -mingw64 -full-path -here -c "\"\$@"\" --"
-        export msys2+=" -msys2 -c "\"\$@"\" --"
-        $msys2 pacman --sync --noconfirm --needed mingw-w64-x86_64-toolchain
-        ## Install more MSYS2 packages from https://packages.msys2.org/base here
-        $msys2 pacman --noconfirm -S mingw-w64-x86_64-qt5
-        $msys2 pacman --noconfirm -S mingw-w64-x86_64-cmake
-        export PATH=/C/tools/msys64/mingw64/bin:$PATH
-        export MAKE="mingw32-make"  # so that Autotools can find it
-        ;;
-    esac
-before_cache:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    $msys2 pacman --sync --clean --noconfirm ;
-    fi
-
-cache:
-  directories:
-    - $HOME/AppData/Local/Temp/chocolatey
-    - /C/tools/msys64
+    powershell wget https://code.qt.io/cgit/qbs/qbs.git/tree/scripts/install-qt.sh -OutFile ./install-qt.sh
+    ./install-qt.sh
+    ;;
+    esac
 
 addons:
   homebrew:
@@ -44,7 +21,7 @@ addons:
 
 script:
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-    cmake -D CMAKE_C_COMPILER="C:/tools/msys64/mingw64/bin/gcc.exe" -D CMAKE_MAKE_PROGRAM="C:/tools/msys64/mingw64/bin/mingw32-make.exe" -D CMAKE_CXX_COMPILER="C:/tools/msys64/mingw64/bin/g++.exe" -G "Unix Makefiles" . && mingw32-make ;
+    cmake && nmake ;
     fi
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
     cmake . && make ;
@@ -52,19 +29,20 @@ script:
 
 after_success:
   - if [[ $TRAVIS_OS_NAME == "osx" ]]; then
-    zip -r tidal-rpc-osx.zip tidal-rpc.app;
+    - macdeployqt tidal-rpc.app
+    - zip -r tidal-rpc-osx.zip tidal-rpc.app;
     fi
   - if [[ $TRAVIS_OS_NAME == "windows" ]]; then
-  - windeployqt  tidal-rpc.exe;
-  - mkdir Release;
-  - copy *.exe  Release;
-  - copy *.dll Release;
-  - echo D | xcopy /s imageformats "Release/imageformats";
-  - echo D | xcopy /s platforms "Release/platforms";
-  - echo D | xcopy /s styles "Release/styles";
-  - copy LICENSE Release;
-  - cd Release;
-  - 7z  a -tzip "tidal-rpc-win.zip";
+  - windeployqt  tidal-rpc.exe
+  - mkdir Release
+  - copy *.exe  Release
+  - copy *.dll Release
+  - echo D | xcopy /s imageformats "Release/imageformats"
+  - echo D | xcopy /s platforms "Release/platforms"
+  - echo D | xcopy /s styles "Release/styles"
+  - copy LICENSE Release
+  - cd Release
+  - 7z  a -tzip "tidal-rpc-win.zip"
   - copy tidal-rpc-win.zip ..
     fi
 
