@@ -5,9 +5,9 @@ project(TIDAL-RPC)
 include_directories(.)
 
 if (APPLE)
-    set(CMAKE_PREFIX_PATH "/usr/local/opt/qt/lib/cmake/Qt5Widgets/")
+#    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
 else (APPLE)
-        set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.1\\msvc2019_64")
+    #        set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.2\\msvc2019_64")
 endif (APPLE)
 
 # Find includes in corresponding build directories
@@ -82,12 +82,18 @@ if (WIN32)
 elseif (APPLE)
     message("Building for MacOS")
     include_directories(discord-game-sdk/c)
-    target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dylib)
+    target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dylib)
     set(CMAKE_CXX_FLAGS "-framework carbon -framework foundation -framework CoreFoundation")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")
     set(MACOSX_BUNDLE_BUNDLE_NAME rpc.tidal)
     set(MACOSX_BUNDLE_EXECUTABLE_NAME tidal-rpc)
     set(MACOSX_BUNDLE_INFO_STRING rpc.tidal)
     set(MACOSX_BUNDLE_GUI_IDENTIFIER rpc.tidal)
-    set(MACOSX_BUNDLE_BUNDLE_NAME rpc.tidal)
+    set(MACOSX_BUNDLE_ICON_FILE icon.icns)
+
+    set(app_icon_macos "${CMAKE_SOURCE_DIR}/assets/icon.icns")
+    set_source_files_properties(${app_icon_macos} PROPERTIES
+            MACOSX_PACKAGE_LOCATION "Resources")
+
+    target_sources(tidal-rpc PRIVATE ${app_icon_macos})
 endif ()

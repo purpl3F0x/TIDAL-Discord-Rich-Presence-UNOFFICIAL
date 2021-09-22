@@ -9,8 +9,7 @@ compiler:
 
 before_install:
   - |-
-    case $TRAVIS_OS_NAME in
-      windows)
+    case $TRAVIS_OS_NAME in windows)
         powershell wget https://code.qt.io/cgit/qbs/qbs.git/tree/scripts/install-qt.sh -OutFile install-qt.sh && install-qt.sh
         ;;
     esac
