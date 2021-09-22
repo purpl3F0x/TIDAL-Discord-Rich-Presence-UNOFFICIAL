@@ -69,19 +69,20 @@ BOOL CALLBACK enumWindowsProc(HWND hwnd, LPARAM lParam) {
     for (DWORD pid : (paramRe.pids)) {
         if (winId == pid) {
 
-            std::wstring title(GetWindowTextLength(hwnd) + 1, L'\0');
-            GetWindowTextW(hwnd, &title[0], title.size()); //note: >=C++11
+		  std::wstring title(GetWindowTextLength(hwnd) + 1, L'\0');
+		  GetWindowTextW(hwnd, &title[0], (int)title.size()); //note: >=C++11
 
-            if (title.find(L"MSCTFIME UI") == 0
-                || title.find(L"Default IME") == 0
-                || title.find(L"MediaPlayer SMTC window") == 0
-                || title.size() == 1
-                ) {
-                return TRUE;
-            }
-            paramRe.tidalStatus = opened;
+		  if (title.find(L"MSCTFIME UI") == 0
+			  || title.find(L"Default IME") == 0
+			  || title.find(L"MediaPlayer SMTC window") == 0
+			  || title.size() == 1
+			  )
+		  {
+			return TRUE;
+		  }
+		  paramRe.tidalStatus = opened;
 
-            std::regex_match(title, rgx);
+//            std::regex_match(title, rgx);
             std::wsmatch matches;
 
             if (std::regex_search(title, matches, rgx)) {

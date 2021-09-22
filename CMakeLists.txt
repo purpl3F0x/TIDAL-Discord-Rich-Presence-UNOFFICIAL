@@ -1,6 +1,4 @@
 cmake_minimum_required(VERSION 3.10)
-
-
 project(TIDAL-RPC)
 
 # Create executable
@@ -8,6 +6,8 @@ include_directories(.)
 
 if (APPLE)
     set(CMAKE_PREFIX_PATH "/usr/local/opt/qt/lib/cmake/Qt5Widgets/")
+else (APPLE)
+    #    set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.1\\msvc2019_64")
 endif (APPLE)
 
 # Find includes in corresponding build directories
@@ -18,17 +18,11 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTOUIC ON)
 
 # Find the QtWidgets library
-find_package(Qt5Widgets CONFIG REQUIRED)
-
-
-set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
-
+find_package(Qt5 COMPONENTS Widgets Core Network gui REQUIRED)
+#set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 qt5_add_resources(QRCS resources.qrc)
-
 add_executable(tidal-rpc main.cc resource.rc ${QRCS})
-
-
-target_link_libraries(tidal-rpc Qt5::Widgets)
+target_link_libraries(tidal-rpc Qt5::Widgets Qt5::Core Qt5::Network)
 
 
 # generate proper GUI program on specified platform if on release
@@ -58,12 +52,12 @@ endif ()
 
 
 if (WIN32)
-
     if (MSVC)
         STRING(REPLACE "/Od" "/O2" CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+        set(CMAKE_CXX_FLAGS_RELEASE "/MT")
     else ()
         target_link_libraries(tidal-rpc wsock32 ws2_32)
-        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -ffast-math")
+        set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mwindows -lwinpthread")
     endif ()
 
 
@@ -90,7 +84,7 @@ elseif (APPLE)
     include_directories(discord-game-sdk/c)
     target_link_libraries(tidal-rpc ${CMAKE_BINARY_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dylib)
     set(CMAKE_CXX_FLAGS "-framework carbon -framework foundation -framework CoreFoundation")
-    set(CMAKE_CXX_FLAGS_RELEASE "-O3 -fast-math")
+    set(CMAKE_CXX_FLAGS_RELEASE "-O3")
     set(MACOSX_BUNDLE_BUNDLE_NAME rpc.tidal)
     set(MACOSX_BUNDLE_EXECUTABLE_NAME tidal-rpc)
     set(MACOSX_BUNDLE_INFO_STRING rpc.tidal)
