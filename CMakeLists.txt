@@ -7,7 +7,7 @@ include_directories(.)
 if (APPLE)
     set(CMAKE_PREFIX_PATH "/usr/local/opt/qt/lib/cmake/Qt5Widgets/")
 else (APPLE)
-    #    set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.1\\msvc2019_64")
+        set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.1\\msvc2019_64")
 endif (APPLE)
 
 # Find includes in corresponding build directories
