@@ -50,16 +50,16 @@ for:
     build_script:
       - mkdir .\build
       - cd .\build
-      - cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../
+      - cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../ -DVERSION="v.%APPVEYOR_BUILD_VERSION%"
       - cmake --build .
       - call %QTDIR%\bin\windeployqt --release tidal-rpc.exe
 
     after_build:
       - echo zipping %APPVEYOR_BUILD_VERSION%
-      - 7z tidal-rpc.%APPVEYOR_BUILD_VERSION%.zip %APPVEYOR_BUILD_FOLDER%/tidal-rpc.exe %APPVEYOR_BUILD_FOLDER%/*.dll %APPVEYOR_BUILD_FOLDER%/imageformats/*.dll %APPVEYOR_BUILD_FOLDER%/platforms/*.dll %APPVEYOR_BUILD_FOLDER%/styles/*.dll
+      - 7z a tidal-rpc.zip tidal-rpc.exe *.dll ./imageformats/ ./platforms/ ./styles/
 
     artifacts:
-      - path: tidal-rpc.%APPVEYOR_BUILD_VERSION%.zip
+      - path: build/tidal-rpc.zip
 
   - # Mac
     matrix:
@@ -72,10 +72,10 @@ for:
     build_script:
       - mkdir .\build
       - cd .\build
-      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../
+      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../ -DVERSION="v.%APPVEYOR_BUILD_VERSION%"
       - cmake --build .
       - $HOME/Qt/5.15.2/clang_64/bin/macdeployqt tidal-rpc.app
 
 
     artifacts:
-      - path: build/tidal-rpc.app
+      - path: /build/tidal-rpc.app
