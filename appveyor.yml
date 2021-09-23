@@ -50,7 +50,7 @@ for:
     build_script:
       - mkdir .\build
       - cd .\build
-      - cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../ -DVERSION="v.%APPVEYOR_BUILD_VERSION%"
+      - cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=%APPVEYOR_BUILD_VERSION% ../
       - cmake --build .
       - call %QTDIR%\bin\windeployqt --release tidal-rpc.exe
 
@@ -60,6 +60,21 @@ for:
 
     artifacts:
       - path: build/tidal-rpc.zip
+        name: tidal-rpc.zip
+        type: zip
+
+    deploy:
+      - provider: GitHub
+        release: v.$(APPVEYOR_BUILD_VERSION)
+        description: "[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)"
+        tag: v.$(APPVEYOR_BUILD_VERSION)
+        auth_token:
+          secure: StuLm9lo1/+qXVAweuFO3sPdz6r8PlbCmQdpNGQ9VxA529xhLG6YPmi+E2L8SLQk            # your encrypted token from GitHub
+        artifact: tidal-rpc.zip          # upload all NuGet packages to release assets
+        draft: true
+        prerelease: false
+        on:
+          branch: master                 # release from master branch only
 
   - # Mac
     matrix:
@@ -70,12 +85,32 @@ for:
       - export PATH=$HOME/Qt/5.15.2/clang_64/bin:$PATH
 
     build_script:
-      - mkdir .\build
-      - cd .\build
-      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../ -DVERSION="v.%APPVEYOR_BUILD_VERSION%"
+      - mkdir build
+      - cd build
+      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../
       - cmake --build .
-      - $HOME/Qt/5.15.2/clang_64/bin/macdeployqt tidal-rpc.app
+      - $HOME/Qt/5.15.2/clang_64/bin/macdeployqt tidal-rpc.app -dmg
+
+    after_build:
+      - echo $APPVEYOR_BUILD_FOLDER
+      - ls
+      - pwd
 
 
     artifacts:
-      - path: /build/tidal-rpc.app
+      - path: build/tidal-rpc.dmg
+        name: tidal-rpc.dmg
+        type: file
+
+    deploy:
+      - provider: GitHub
+        release: v.$(APPVEYOR_BUILD_VERSION)
+        description: "[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)"
+        tag: v.$(APPVEYOR_BUILD_VERSION)
+        auth_token:
+          secure: StuLm9lo1/+qXVAweuFO3sPdz6r8PlbCmQdpNGQ9VxA529xhLG6YPmi+E2L8SLQk              # your encrypted token from GitHub
+        artifact: tidal-rpc.dmg          # upload all NuGet packages to release assets
+        draft: true
+        prerelease: false
+        on:
+          branch: master                 # release from master branch only

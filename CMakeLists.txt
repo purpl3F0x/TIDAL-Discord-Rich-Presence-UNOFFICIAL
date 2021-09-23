@@ -5,9 +5,9 @@ project(TIDAL-RPC)
 include_directories(.)
 
 if (APPLE)
-#    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
+    #    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
 else (APPLE)
-    #        set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.2\\msvc2019_64")
+    set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.1\\msvc2019_64")
 endif (APPLE)
 
 # Find includes in corresponding build directories
@@ -17,13 +17,16 @@ set(CMAKE_AUTOMOC ON)
 # Create code from a list of Qt designer ui files
 set(CMAKE_AUTOUIC ON)
 
+
 # Find the QtWidgets library
 find_package(Qt5 COMPONENTS Widgets Core Network gui REQUIRED)
 #set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 qt5_add_resources(QRCS resources.qrc)
 add_executable(tidal-rpc main.cc resource.rc ${QRCS})
 target_link_libraries(tidal-rpc Qt5::Widgets Qt5::Core Qt5::Network)
-
+if (VERSION)
+    target_compile_definitions(tidal-rpc PUBLIC VERSION="${VERSION}")
+endif (VERSION)
 
 # generate proper GUI program on specified platform if on release
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
