@@ -3,7 +3,9 @@
  * @authors Stavros Avramidis
  */
 
-#define VERSION "1.3"
+#ifndef VERSION
+#define VERSION "v.1.3.0"
+#endif
 
 /* C++ libs */
 #include <atomic>
@@ -352,7 +354,11 @@ int main(int argc, char **argv)
   app.setWindowIcon(appIcon);
 
   QSystemTrayIcon tray(appIcon, &app);
-  QAction titleAction(appIcon, "TIDAL - Discord RPC ", nullptr);
+  QAction titleAction(appIcon, "TIDAL - Discord RPC " VERSION, nullptr);
+  QObject::connect(&titleAction, &QAction::triggered, [&app]() {
+	QDesktopServices::openUrl(QUrl("https://github.com/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/", QUrl::TolerantMode));
+  });
+
   QAction changePresenceStatusAction("Running", nullptr);
   changePresenceStatusAction.setCheckable(true);
   changePresenceStatusAction.setChecked(true);
