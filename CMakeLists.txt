@@ -25,7 +25,7 @@ qt5_add_resources(QRCS resources.qrc)
 add_executable(tidal-rpc main.cc resource.rc ${QRCS})
 target_link_libraries(tidal-rpc Qt5::Widgets Qt5::Core Qt5::Network)
 if (VERSION)
-    target_compile_definitions(tidal-rpc PUBLIC VERSION="${VERSION}")
+    target_compile_definitions(tidal-rpc PUBLIC VERSION="v.${VERSION}")
 endif (VERSION)
 
 # generate proper GUI program on specified platform if on release
