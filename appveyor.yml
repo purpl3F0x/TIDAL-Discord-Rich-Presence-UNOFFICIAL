@@ -12,7 +12,7 @@ environment:
   matrix:
     - ARCH: x64
       COMPILER: VS2019
-      QTDIR: C:\Qt\5.15.2\msvc2019_64
+      QTDIR: C:\Qt\6.2.0\msvc2019_64
 
     - ARCH: x64
       COMPILER: Clang
@@ -89,7 +89,7 @@ for:
       - cd build
       - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../
       - cmake --build .
-      - $HOME/Qt/5.15.2/clang_64/bin/macdeployqt tidal-rpc.app -dmg
+      - $HOME/Qt/6.1.2/clang_64/bin/macdeployqt tidal-rpc.app -dmg
 
     after_build:
       - echo $APPVEYOR_BUILD_FOLDER

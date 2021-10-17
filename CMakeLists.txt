@@ -7,7 +7,7 @@ include_directories(.)
 if (APPLE)
     #    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
 else (APPLE)
-    set(CMAKE_PREFIX_PATH "C:\\Qt\\5.15.1\\msvc2019_64")
+    set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.0\\msvc2019_64")
 endif (APPLE)
 
 # Find includes in corresponding build directories
@@ -19,11 +19,11 @@ set(CMAKE_AUTOUIC ON)
 
 
 # Find the QtWidgets library
-find_package(Qt5 COMPONENTS Widgets Core Network gui REQUIRED)
+find_package(Qt6 COMPONENTS Widgets Core Network gui REQUIRED)
 #set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
-qt5_add_resources(QRCS resources.qrc)
+qt6_add_resources(QRCS resources.qrc)
 add_executable(tidal-rpc main.cc resource.rc ${QRCS})
-target_link_libraries(tidal-rpc Qt5::Widgets Qt5::Core Qt5::Network)
+target_link_libraries(tidal-rpc Qt6::Widgets Qt6::Core Qt6::Network)
 if (VERSION)
     target_compile_definitions(tidal-rpc PUBLIC VERSION="v.${VERSION}")
 endif (VERSION)
