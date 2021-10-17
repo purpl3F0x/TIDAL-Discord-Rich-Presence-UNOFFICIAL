@@ -82,7 +82,7 @@ for:
         - image: macos-mojave
 
     before_build:
-      - export PATH=$HOME/Qt/5.15.2/clang_64/bin:$PATH
+      - export PATH=$HOME/Qt/6.1.2/clang_64/bin:$PATH
 
     build_script:
       - mkdir build
