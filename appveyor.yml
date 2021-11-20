@@ -12,7 +12,7 @@ environment:
   matrix:
     - ARCH: x64
       COMPILER: VS2019
-      QTDIR: C:\Qt\6.2.0\msvc2019_64
+      QTDIR: C:\Qt\6.2\msvc2019_64
 
     - ARCH: x64
       COMPILER: Clang
@@ -55,6 +55,7 @@ for:
       - call %QTDIR%\bin\windeployqt --release tidal-rpc.exe
 
     after_build:
+      - xcopy /c "C:\OpenSSL-v111-Win64\bin\.*dll"
       - echo zipping %APPVEYOR_BUILD_VERSION%
       - 7z a tidal-rpc.zip tidal-rpc.exe *.dll ./imageformats/ ./platforms/ ./styles/
 

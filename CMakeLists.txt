@@ -4,11 +4,11 @@ project(TIDAL-RPC)
 # Create executable
 include_directories(.)
 
-if (APPLE)
-    #    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
-else (APPLE)
-    set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.0\\msvc2019_64")
-endif (APPLE)
+#if (APPLE)
+#    #    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
+#else (APPLE)
+#    set(CMAKE_PREFIX_PATH "C:\\Qt\\6.2.0\\msvc2019_64")
+#endif (APPLE)
 
 # Find includes in corresponding build directories
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
