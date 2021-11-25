@@ -55,9 +55,9 @@ for:
       - call %QTDIR%\bin\windeployqt --release tidal-rpc.exe
 
     after_build:
-      - xcopy /c "C:\OpenSSL-v111-Win64\bin\.*dll"
+      - xcopy /c "C:\OpenSSL-v111-Win64\bin\*.dll"
       - echo zipping %APPVEYOR_BUILD_VERSION%
-      - 7z a tidal-rpc.zip tidal-rpc.exe *.dll ./imageformats/ ./platforms/ ./styles/
+      - 7z a tidal-rpc.zip tidal-rpc.exe *.dll ./imageformats/ ./platforms/ ./styles/ ./iconengines ./tls
 
     artifacts:
       - path: build/tidal-rpc.zip
@@ -83,14 +83,14 @@ for:
         - image: macos-mojave
 
     before_build:
-      - export PATH=$HOME/Qt/6.1.2/clang_64/bin:$PATH
+      - export PATH=$HOME/Qt/6.2.0/clang_64/bin:$PATH
 
     build_script:
       - mkdir build
       - cd build
-      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../
+      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../ -DQt6_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6 -DQt6CoreTools_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6CoreTools -DQt6GuiTools_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6GuiTools -DQt6WidgetsTools_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6WidgetsTools ..
       - cmake --build .
-      - $HOME/Qt/6.1.2/clang_64/bin/macdeployqt tidal-rpc.app -dmg
+      - $HOME/Qt/6.2.0/clang_64/bin/macdeployqt tidal-rpc.app -dmg
 
     after_build:
       - echo $APPVEYOR_BUILD_FOLDER
