@@ -47,6 +47,10 @@ P.S. Remember to make sure you have Game Activity enabled!
 
 ![example of Game Activity tab inside of Discord Settings](https://user-images.githubusercontent.com/3516420/80171200-53356280-85af-11ea-8a51-66b3780250be.png)
 
+Check that _Tidal - Discord RPC_ is running, and add it as a game. It might show as "TIDAL", or as the band you are currently listening to:
+
+![Select Tidal - Discord RPC as a ](https://user-images.githubusercontent.com/12559216/149215040-98e81a25-7ba7-44c5-828b-74b44080d7ee.png)
+
 
 ## Build Instructions
 
