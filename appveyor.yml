@@ -85,14 +85,14 @@ for:
         - job_name: Mac OSX (Clang)
 
     #    before_build:
-    #      - export PATH=$HOME/Qt/6.2.0/macos/bin/:$PATH
+    #      - export PATH=$HOME/Qt/6.4.0/macos/bin/:$PATH
 
     build_script:
       - mkdir build
       - cd build
-      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../ -DQt6_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6 -DQt6CoreTools_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6CoreTools -DQt6GuiTools_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6GuiTools -DQt6WidgetsTools_DIR=$HOME/Qt/6.2.0/macos/lib/cmake/Qt6WidgetsTools ..
+      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../ -DQt6_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6 -DQt6CoreTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6CoreTools -DQt6GuiTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6GuiTools -DQt6WidgetsTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6WidgetsTools ..
       - cmake --build .
-      - $HOME/Qt/6.2.0/macos/bin/macdeployqt tidal-rpc.app -dmg
+      - $HOME/Qt/6.4.0/macos/bin/macdeployqt tidal-rpc.app -dmg
 
     after_build:
       - echo $APPVEYOR_BUILD_FOLDER
