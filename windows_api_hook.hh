@@ -13,6 +13,7 @@
 #include <string>
 #include <vector>
 // winapi
+#define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 #include <tlhelp32.h>
 #include <Winuser.h>

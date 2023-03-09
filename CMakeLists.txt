@@ -3,7 +3,6 @@ project(TIDAL-RPC)
 
 # Create executable
 include_directories(.)
-
 #if (APPLE)
 #    #    set(CMAKE_PREFIX_PATH "~/Qt/5.14.2/clang_64/lib/cmake")
 #else (APPLE)
@@ -23,9 +22,11 @@ find_package(Qt6 COMPONENTS Widgets Core Network gui REQUIRED)
 #set(CMAKE_CXX_FLAGS_COVERAGE "${CMAKE_CXX_FLAGS_RELEASE} -fprofile-arcs -ftest-coverage")
 qt6_add_resources(QRCS resources.qrc)
 add_executable(tidal-rpc main.cc resource.rc ${QRCS})
+target_include_directories(tidal-rpc PRIVATE discord-game-sdk/c)
+target_include_directories(tidal-rpc PRIVATE discord-game-sdk/cpp)
 target_link_libraries(tidal-rpc Qt6::Widgets Qt6::Core Qt6::Network)
 if (VERSION)
-    target_compile_definitions(tidal-rpc PUBLIC VERSION="v.${VERSION}")
+    target_compile_definitions(tidal-rpc PUBLIC VERSION= "v.${VERSION}")
 endif (VERSION)
 
 # generate proper GUI program on specified platform if on release
@@ -68,7 +69,7 @@ if (WIN32)
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits
         message("\t64-bit")
-        target_include_directories(tidal-rpc PRIVATE discord-game-sdk/c)
+
         target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dll.lib)
 
         configure_file(${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dll ${CMAKE_BINARY_DIR}/discord_game_sdk.dll COPYONLY)
@@ -76,7 +77,6 @@ if (WIN32)
     elseif (CMAKE_SIZEOF_VOID_P EQUAL 4)
         # 32 bits
         message("\t32-bit")
-        target_include_directories(tidal-rpc PRIVATE discord-game-sdk/c)
         target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86/discord_game_sdk.dll.lib)
 
         configure_file(${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86/discord_game_sdk.dll ${CMAKE_BINARY_DIR}/discord_game_sdk.dll COPYONLY)
@@ -84,7 +84,6 @@ if (WIN32)
 
 elseif (APPLE)
     message("Building for MacOS")
-    include_directories(discord-game-sdk/c)
     target_link_libraries(tidal-rpc ${CMAKE_SOURCE_DIR}/discord-game-sdk/lib/x86_64/discord_game_sdk.dylib)
     set(CMAKE_CXX_FLAGS "-framework carbon -framework foundation -framework CoreFoundation")
     set(CMAKE_CXX_FLAGS_RELEASE "-O3")

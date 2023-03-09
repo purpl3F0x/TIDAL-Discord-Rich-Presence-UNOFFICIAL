@@ -29,9 +29,10 @@
 #include <QSystemTrayIcon>
 #include <QTimer>
 /* local libs*/
-#include "discord_game_sdk.h"
 #include "httplib.hh"
 #include "json.hh"
+
+#define DISCORD_REQUIRE(x) assert(x == DiscordResult_Ok)
 
 #ifdef WIN32
 #include "windows_api_hook.hh"
@@ -40,6 +41,8 @@
 #else
 #error "Not supported target"
 #endif
+
+#include "discord_game_sdk.h"
 
 #define CURRENT_TIME std::time(nullptr)
 #define HIFI_ASSET "hifi"
@@ -108,6 +111,7 @@ std::string urlEncode(const std::string &value) {
 struct Application {
   struct IDiscordCore *core;
   struct IDiscordUsers *users;
+  bool isDiscordOK = false;
 };
 
 struct Application app;
@@ -177,12 +181,18 @@ static void discordInit() {
   memset(&events, 0, sizeof(events));
 
   struct DiscordCreateParams params{};
+  DiscordCreateParamsSetDefault(&params);
   params.client_id = APPLICATION_ID;
-  params.flags = DiscordCreateFlags_Default;
+  params.flags = DiscordCreateFlags_NoRequireDiscord;
   params.events = &events;
   params.event_data = &app;
 
-  DiscordCreate(DISCORD_VERSION, &params, &app.core);
+  auto result = DiscordCreate(DISCORD_VERSION, &params, &app.core);
+  if (result == DiscordResult_Ok) {
+	app.isDiscordOK = true;
+  }
+
+  auto user_manager = &app.core->get_user_manager;
 
   std::lock_guard<std::mutex> lock(currentSongMutex);
   currentStatus = "Connected to Discord";
@@ -197,6 +207,11 @@ static void discordInit() {
   static Song curSong;
 
   for (;;) {
+	if (!app.isDiscordOK) {
+	  std::this_thread::sleep_for(std::chrono::seconds(2));
+	  discordInit();
+	  continue;
+	}
 	if (isPresenceActive) {
 	  std::wstring tmpTrack, tmpArtist;
 	  auto localStatus = tidalInfo(tmpTrack, tmpArtist);
@@ -410,6 +425,8 @@ int main(int argc, char **argv) {
 				   [&timer]() { timer.stop(); });
 
   discordInit();
+  std::clog << "Discord Initialized\n";
+
   // RPC loop call
   std::thread t1(rpcLoop);
   t1.detach();
