@@ -72,7 +72,7 @@ for:
         description: "[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)"
         tag: v.$(APPVEYOR_BUILD_VERSION)
         auth_token:
-          secure: NJmli2D4RcorV2PCJA0l7dhI3dbmzio98jPkYU25bBll0nFb1tZolbHtFsfQhpFk           # your encrypted token from GitHub
+          secure: uaiJgGxA9FAn4Z6GUxETsDIJkLKFF+aLshW8PTJadmp04JnCj3kbqBE7f5dzncgTeAAl+/O6QqrBhZK+/QzW7ZWReA27bAVtJeeg2reV/iboGUTqjBuynxbNKMx2c3tK               # your encrypted token from GitHub
         artifact: tidal-rpc.zip          # upload all NuGet packages to release assets
         draft: true
         prerelease: false
@@ -110,7 +110,7 @@ for:
         description: "[![Donate](https://www.paypalobjects.com/en_US/i/btn/btn_donate_LG.gif)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=3XY7W2XHHUZF2&source=url)"
         tag: v.$(APPVEYOR_BUILD_VERSION)
         auth_token:
-          secure: NJmli2D4RcorV2PCJA0l7dhI3dbmzio98jPkYU25bBll0nFb1tZolbHtFsfQhpFk              # your encrypted token from GitHub
+          secure: uaiJgGxA9FAn4Z6GUxETsDIJkLKFF+aLshW8PTJadmp04JnCj3kbqBE7f5dzncgTeAAl+/O6QqrBhZK+/QzW7ZWReA27bAVtJeeg2reV/iboGUTqjBuynxbNKMx2c3tK          # your encrypted token from GitHub
         artifact: tidal-rpc.dmg          # upload all NuGet packages to release assets
         draft: true
         prerelease: false
