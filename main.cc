@@ -7,6 +7,8 @@
 #define VERSION "v.1.3.0"
 #endif
 
+#pragma message("Building version:" VERSION)
+
 /* C++ libs */
 #include <atomic>
 #include <algorithm>
@@ -395,7 +397,7 @@ int main(int argc, char **argv) {
 	nlohmann::json j;
 	j = nlohmann::json::parse(reply->readAll().toStdString());
 
-	if (j["tag_name"].get<std::string>() > VERSION) {
+	if (j["tag_name"].get<std::string>() > (VERSION)) {
 	  tray.showMessage("Tidal Discord RPC", "New Version Available!\nClick to download");
 	  QObject::connect(&tray, &QSystemTrayIcon::messageClicked, &app, []() {
 		QDesktopServices::openUrl(QUrl("https://github.com/purpl3F0x/TIDAL-Discord-Rich-Presence-UNOFFICIAL/releases/latest",

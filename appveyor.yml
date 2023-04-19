@@ -52,7 +52,7 @@ for:
     build_script:
       - mkdir .\build
       - cd .\build
-      - cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=%APPVEYOR_BUILD_VERSION% ../
+      - cmake -G"NMake Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../
       - cmake --build .
       - call %QTDIR%\bin\windeployqt --release tidal-rpc.exe
 
@@ -90,7 +90,7 @@ for:
     build_script:
       - mkdir build
       - cd build
-      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE -DVERSION=$APPVEYOR_BUILD_VERSION ../ -DQt6_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6 -DQt6CoreTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6CoreTools -DQt6GuiTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6GuiTools -DQt6WidgetsTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6WidgetsTools ..
+      - cmake -G"Unix Makefiles" -DCMAKE_BUILD_TYPE=RELEASE ../ -DQt6_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6 -DQt6CoreTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6CoreTools -DQt6GuiTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6GuiTools -DQt6WidgetsTools_DIR=$HOME/Qt/6.4.0/macos/lib/cmake/Qt6WidgetsTools ..
       - cmake --build .
       - $HOME/Qt/6.4.0/macos/bin/macdeployqt tidal-rpc.app -dmg
 

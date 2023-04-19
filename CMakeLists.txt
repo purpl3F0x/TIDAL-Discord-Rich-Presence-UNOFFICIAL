@@ -25,9 +25,11 @@ add_executable(tidal-rpc main.cc resource.rc ${QRCS})
 target_include_directories(tidal-rpc PRIVATE discord-game-sdk/c)
 target_include_directories(tidal-rpc PRIVATE discord-game-sdk/cpp)
 target_link_libraries(tidal-rpc Qt6::Widgets Qt6::Core Qt6::Network)
-if (VERSION)
-    target_compile_definitions(tidal-rpc PUBLIC VERSION= "v.${VERSION}")
-endif (VERSION)
+
+if (DEFINED ENV{APPVEYOR_BUILD_VERSION})
+    target_compile_definitions(tidal-rpc PUBLIC VERSION="v.$ENV{APPVEYOR_BUILD_VERSION}")
+endif ()
+
 
 # generate proper GUI program on specified platform if on release
 if (NOT CMAKE_BUILD_TYPE STREQUAL "Debug")
