@@ -277,6 +277,8 @@ static void discordInit() {
 		  if (res && res->status == 200) {
 			try {
 			  j = json::parse(res->body);
+			  bool isSongSet = false;
+			  unsigned int lastAlbumDate = 0;
 			  for (auto i = 0u;
 				   i < j["tracks"]["totalNumberOfItems"].get<unsigned>(); i++) {
 				// convert title from windows and from tidal api to strings,
@@ -290,16 +292,28 @@ static void discordInit() {
 				  if (curSong.runtime == 0 || j["tracks"]["items"][i]["audioQuality"].get<std::string>()
 					  == "HI_RES") { // Ignore songs with same name if you have found
 					// song
-					curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
-					curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
-					curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
-					curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
-					curSong.cover_id = j["tracks"]["items"][i]["album"]["cover"].get<std::string>();
-					curSong.album = j["tracks"]["items"][i]["album"]["title"].get<std::string>();
-					sprintf(curSong.id, "%u", j["tracks"]["items"][i]["id"].get<unsigned>());
+					if (!isSongSet) {
+					  curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
+					  curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
+					  curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
+					  curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
+					  sprintf(curSong.id, "%u", j["tracks"]["items"][i]["id"].get<unsigned>());
+					}
 
-					if (curSong.isHighRes())
-					  break; // keep searching for high-res version.
+					// find the newest album
+					int year = 0, month = 0, day = 0;
+					std::clog << j["tracks"]["items"][i]["album"]["releaseDate"].get<std::string>().c_str() << std::endl << std::flush;
+					sscanf(j["tracks"]["items"][i]["album"]["releaseDate"].get<std::string>().c_str(), "%d-%d-%d", &year, &month, &day);
+					unsigned int albumDate = year * 10000 + month * 100 + day;
+					if (albumDate > lastAlbumDate) {
+					  curSong.cover_id = j["tracks"]["items"][i]["album"]["cover"].get<std::string>();
+					  curSong.album = j["tracks"]["items"][i]["album"]["title"].get<std::string>();
+					  lastAlbumDate = albumDate;
+					}
+
+					if (curSong.isHighRes()) {
+					  isSongSet = true; // keep searching for high-res version.
+					}
 				  }
 				}
 			  }
