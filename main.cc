@@ -144,9 +144,8 @@ static void updateDiscordPresence(const Song &song) {
 	memset(&activity, 0, sizeof(activity));
 	activity.type = DiscordActivityType_Listening;
 	activity.application_id = APPLICATION_ID;
-	snprintf(activity.details, 128, "%s", song.title.c_str());
-	snprintf(activity.state, 128, "%s",
-			 (song.artist + " - " + song.album).c_str());
+	snprintf(activity.details, 128, "%s - %s", song.title.c_str(), song.artist.c_str());
+	snprintf(activity.state, 128, ""); // empty, so that the text box isn't taller than the cover image
 
 	struct DiscordActivityAssets assets{};
 	memset(&assets, 0, sizeof(assets));
@@ -159,9 +158,11 @@ static void updateDiscordPresence(const Song &song) {
 	std::cout << cover_url << "\n";
 
 	snprintf(assets.large_image, 128, "%s", cover_url.c_str());
+	snprintf(assets.large_text, 128, "Album: %s", song.album.c_str());
 
-	snprintf(assets.large_text, 128, "%s",
-			 song.isHighRes() ? "Playing High-Res Audio" : "");
+	snprintf(assets.small_image, 128, "%s", TIDAL_LOGO_URL.c_str());
+	snprintf(assets.small_text, 128, "%s", "Streaming on TIDAL");
+
 	if (song.id[0] != '\0') {
 	  struct DiscordActivitySecrets secrets{};
 	  memset(&secrets, 0, sizeof(secrets));
