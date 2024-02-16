@@ -294,6 +294,7 @@ static void discordInit() {
 					curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
 					curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
 					curSong.cover_id = j["tracks"]["items"][i]["album"]["cover"].get<std::string>();
+					curSong.album = j["tracks"]["items"][i]["album"]["title"].get<std::string>();
 					sprintf(curSong.id, "%u", j["tracks"]["items"][i]["id"].get<unsigned>());
 
 					if (curSong.isHighRes())
