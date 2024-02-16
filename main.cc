@@ -323,7 +323,7 @@ static void discordInit() {
 			updateDiscordPresence(curSong);
 
 			std::lock_guard<std::mutex> lock(currentSongMutex);
-			currentStatus = "Paused " + curSong.title;
+			currentStatus = "Playing " + curSong.title;
 		  }
 		  if (CURRENT_TIME > curSong.endtime()) {
 			curSong.starttime = CURRENT_TIME;
