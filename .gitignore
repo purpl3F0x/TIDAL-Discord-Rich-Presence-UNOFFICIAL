@@ -1,5 +1,4 @@
 .vscode
-CMakeLists.txt
 CMakeCache.txt
 CMakeFiles/
 Makefile
