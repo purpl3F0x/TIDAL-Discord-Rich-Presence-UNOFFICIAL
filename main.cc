@@ -74,6 +74,7 @@ struct Song {
   int64_t starttime;
   int64_t runtime;
   uint64_t pausedtime;
+  uint64_t repeatCount;
   uint_fast8_t trackNumber;
   uint_fast8_t volumeNumber;
   bool isPaused = false;
@@ -89,6 +90,8 @@ struct Song {
   }
 
   inline bool isHighRes() const noexcept { return quality == master; }
+
+  inline int64_t endtime() const noexcept { return runtime ? starttime + runtime + pausedtime : 0; }
 
   friend std::ostream &operator<<(std::ostream &out, const Song &song) {
 	out << song.title << " of " << song.album << " from " << song.artist << "("
@@ -132,10 +135,8 @@ static void updateDiscordPresence(const Song &song) {
   if (isPresenceActive && song.loaded && !song.isPaused) {
 	struct DiscordActivityTimestamps timestamps{};
 	memset(&timestamps, 0, sizeof(timestamps));
-	if (song.runtime) {
-	  timestamps.end = song.starttime + song.runtime + song.pausedtime;
-	}
 	timestamps.start = song.starttime;
+	timestamps.end = song.endtime();
 
 	struct DiscordActivity activity{
 		DiscordActivityType_Listening
@@ -149,7 +150,7 @@ static void updateDiscordPresence(const Song &song) {
 
 	struct DiscordActivityAssets assets{};
 	memset(&assets, 0, sizeof(assets));
-	  activity.timestamps = timestamps;
+	activity.timestamps = timestamps;
 
 	// Get url of album picture
 	auto cover_id_url = song.cover_id;
@@ -253,6 +254,7 @@ static void discordInit() {
 
 		  curSong.runtime = 0;
 		  curSong.pausedtime = 0;
+		  curSong.repeatCount = 0;
 		  curSong.setQuality("");
 		  curSong.id[0] = '\0';
 		  curSong.loaded = true;
@@ -323,6 +325,12 @@ static void discordInit() {
 			std::lock_guard<std::mutex> lock(currentSongMutex);
 			currentStatus = "Paused " + curSong.title;
 		  }
+		  if (CURRENT_TIME > curSong.endtime()) {
+			curSong.starttime = CURRENT_TIME;
+			curSong.pausedtime = 0;
+			curSong.repeatCount += 1;
+			updateDiscordPresence(curSong);
+		  }
 		}
 
 	  } else if (localStatus == opened) {
@@ -346,17 +354,17 @@ static void discordInit() {
 	if (app.isDiscordOK) {
 	  if (!isPresenceActive) {
 		kill_discord = true;
-	  curSong = Song();
-	  updateDiscordPresence(curSong);
+		curSong = Song();
+		updateDiscordPresence(curSong);
 
-	  std::lock_guard<std::mutex> lock(currentSongMutex);
-	  currentStatus = "Disabled";
-	}
+		std::lock_guard<std::mutex> lock(currentSongMutex);
+		currentStatus = "Disabled";
+	  }
 
-	enum EDiscordResult result = app.core->run_callbacks(app.core);
-	if (result != DiscordResult_Ok) {
-	  std::clog << "Bad result " << result << "\n";
-	}
+	  enum EDiscordResult result = app.core->run_callbacks(app.core);
+	  if (result != DiscordResult_Ok) {
+		std::clog << "Bad result " << result << "\n";
+	  }
 
 	  if (!kill_discord) {
 		kill_timeout = 0;
