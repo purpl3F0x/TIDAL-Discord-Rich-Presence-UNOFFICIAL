@@ -66,7 +66,6 @@ if (WIN32)
         set(CMAKE_CXX_FLAGS_RELEASE "-O3 -mwindows -lwinpthread")
     endif ()
 
-
     message("Building for Windows")
     if (CMAKE_SIZEOF_VOID_P EQUAL 8)
         # 64 bits

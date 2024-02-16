@@ -1,5 +1,5 @@
 .vscode
-CMakeLists.txt
+CMakeSettings.json
 CMakeCache.txt
 CMakeFiles/
 Makefile
@@ -12,3 +12,4 @@ tidal-rpc_autogen/
 /cmake-build-*/
 /tidal-rpc.pro.user
 /.idea/
+/out
