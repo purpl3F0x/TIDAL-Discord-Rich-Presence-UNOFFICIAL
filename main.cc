@@ -333,6 +333,22 @@ static void discordInit() {
 
 int main(int argc, char **argv) {
 
+  // allow passing a custom application id (for custom "game" title)
+  if (argc == 2) {
+	const char* app_id = argv[1];
+	try {
+	  APPLICATION_ID = std::stoll(app_id);
+	}
+	catch (std::exception const& ex) {
+	  std::cerr << "The first argument must be a Discord application ID." << std::endl;
+	  return -1;
+	}
+  }
+  else if (argc > 2) {
+	std::cerr << "Too many arguments." << std::endl;
+	return -1;
+  }
+
   // get country code for TIDAL api queries
   countryCode = getLocale();
   isPresenceActive = true;
