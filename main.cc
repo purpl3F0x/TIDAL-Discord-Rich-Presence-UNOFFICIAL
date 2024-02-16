@@ -46,10 +46,15 @@
 
 #include "discord_game_sdk.h"
 
+// TIDAL logo from the official TIDAL "artist" page: https://tidal.com/browse/artist/6712922
+static const std::string TIDAL_LOGO_URL = "https://resources.tidal.com/images/d156d3e0/a5cd/4066/8c36/b13edab7bbcc/750x750.jpg";
+
 #define CURRENT_TIME std::time(nullptr)
 #define HIFI_ASSET "hifi"
 
 static long long APPLICATION_ID = 584458858731405315;
+static const int RPC_IDLE_TIMEOUT_SECONDS = 5;
+
 std::atomic<bool> isPresenceActive;
 static char *countryCode = nullptr;
 
@@ -119,10 +124,12 @@ struct Application {
 struct Application app;
 
 static void updateDiscordPresence(const Song &song) {
+  if (!app.isDiscordOK) return;
+
   struct IDiscordActivityManager *manager =
 	  app.core->get_activity_manager(app.core);
 
-  if (isPresenceActive && song.loaded) {
+  if (isPresenceActive && song.loaded && !song.isPaused) {
 	struct DiscordActivityTimestamps timestamps{};
 	memset(&timestamps, 0, sizeof(timestamps));
 	if (song.runtime) {
@@ -142,12 +149,7 @@ static void updateDiscordPresence(const Song &song) {
 
 	struct DiscordActivityAssets assets{};
 	memset(&assets, 0, sizeof(assets));
-	if (song.isPaused) {
-	  snprintf(assets.small_image, 128, "%s", "pause");
-	  snprintf(assets.small_text, 128, "%s", "Paused");
-	} else {
 	  activity.timestamps = timestamps;
-	}
 
 	// Get url of album picture
 	auto cover_id_url = song.cover_id;
@@ -172,7 +174,22 @@ static void updateDiscordPresence(const Song &song) {
 	manager->update_activity(manager, &activity, nullptr, nullptr);
   } else {
 	//        std::clog << "Clearing activity\n";
-	manager->clear_activity(manager, nullptr, nullptr);
+	// manager->clear_activity(manager, nullptr, nullptr);
+	struct DiscordActivity activity {
+	  DiscordActivityType_Listening
+	};
+	memset(&activity, 0, sizeof(activity));
+	activity.type = DiscordActivityType_Listening;
+	activity.application_id = APPLICATION_ID;
+	snprintf(activity.details, 128, "Idle");
+	snprintf(activity.state, 128, "");
+	struct DiscordActivityAssets assets {};
+	memset(&assets, 0, sizeof(assets));
+	snprintf(assets.large_image, 128, "%s", TIDAL_LOGO_URL.c_str());
+	snprintf(assets.large_text, 128, "%s", "TIDAL");
+	activity.assets = assets;
+	activity.instance = false;
+	manager->update_activity(manager, &activity, nullptr, nullptr);
   }
 }
 
@@ -207,19 +224,27 @@ static void discordInit() {
   char getSongInfoBuf[1024];
   json j;
   static Song curSong;
+  int kill_timeout = 0;
 
   for (;;) {
-	if (!app.isDiscordOK) {
-	  std::this_thread::sleep_for(std::chrono::seconds(2));
-	  discordInit();
-	  continue;
-	}
+	bool kill_discord = false;
+
 	if (isPresenceActive) {
 	  std::wstring tmpTrack, tmpArtist;
 	  auto localStatus = tidalInfo(tmpTrack, tmpArtist);
 
 	  // If song is playing
 	  if (localStatus == playing) {
+		// only init if something is playing
+		if (!app.isDiscordOK) {
+		  discordInit();
+		  std::clog << "Discord Initialized\n";
+		  if (!app.isDiscordOK) {
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			continue;
+		  }
+		}
+
 		// if new song is playing
 		if (rawWstringToString(tmpTrack) != curSong.title || rawWstringToString(tmpArtist) != curSong.artist) {
 		  // assign new info to current track
@@ -304,17 +329,23 @@ static void discordInit() {
 		curSong.pausedtime += 1;
 		curSong.isPaused = true;
 		updateDiscordPresence(curSong);
+		kill_discord = true;
 
 		std::lock_guard<std::mutex> lock(currentSongMutex);
 		currentStatus = "Paused " + curSong.title;
 	  } else {
 		curSong = Song();
 		updateDiscordPresence(curSong);
+		kill_discord = true;
 
 		std::lock_guard<std::mutex> lock(currentSongMutex);
 		currentStatus = "Waiting for Tidal";
 	  }
-	} else {
+	}
+
+	if (app.isDiscordOK) {
+	  if (!isPresenceActive) {
+		kill_discord = true;
 	  curSong = Song();
 	  updateDiscordPresence(curSong);
 
@@ -325,6 +356,19 @@ static void discordInit() {
 	enum EDiscordResult result = app.core->run_callbacks(app.core);
 	if (result != DiscordResult_Ok) {
 	  std::clog << "Bad result " << result << "\n";
+	}
+
+	  if (!kill_discord) {
+		kill_timeout = 0;
+	  }
+	  else if (kill_timeout++ >= RPC_IDLE_TIMEOUT_SECONDS) {
+		struct IDiscordActivityManager* manager = app.core->get_activity_manager(app.core);
+		manager->clear_activity(manager, nullptr, nullptr);
+		app.core->destroy(app.core);
+		app.core = nullptr;
+		app.isDiscordOK = false;
+		kill_timeout = 0;
+	  }
 	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -442,8 +486,8 @@ int main(int argc, char **argv) {
   QObject::connect(&app, &QApplication::aboutToQuit,
 				   [&timer]() { timer.stop(); });
 
-  discordInit();
-  std::clog << "Discord Initialized\n";
+  // discordInit();
+  // std::clog << "Discord Initialized\n";
 
   // RPC loop call
   std::thread t1(rpcLoop);
