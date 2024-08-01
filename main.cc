@@ -46,10 +46,15 @@
 
 #include "discord_game_sdk.h"
 
+// TIDAL logo from the official TIDAL "artist" page: https://tidal.com/browse/artist/6712922
+static const std::string TIDAL_LOGO_URL = "https://resources.tidal.com/images/d156d3e0/a5cd/4066/8c36/b13edab7bbcc/750x750.jpg";
+
 #define CURRENT_TIME std::time(nullptr)
 #define HIFI_ASSET "hifi"
 
 static long long APPLICATION_ID = 584458858731405315;
+static const int RPC_IDLE_TIMEOUT_SECONDS = 5;
+
 std::atomic<bool> isPresenceActive;
 static char *countryCode = nullptr;
 
@@ -69,6 +74,7 @@ struct Song {
   int64_t starttime;
   int64_t runtime;
   uint64_t pausedtime;
+  uint64_t repeatCount;
   uint_fast8_t trackNumber;
   uint_fast8_t volumeNumber;
   bool isPaused = false;
@@ -84,6 +90,8 @@ struct Song {
   }
 
   inline bool isHighRes() const noexcept { return quality == master; }
+
+  inline int64_t endtime() const noexcept { return runtime ? starttime + runtime + pausedtime : 0; }
 
   friend std::ostream &operator<<(std::ostream &out, const Song &song) {
 	out << song.title << " of " << song.album << " from " << song.artist << "("
@@ -119,16 +127,16 @@ struct Application {
 struct Application app;
 
 static void updateDiscordPresence(const Song &song) {
+  if (!app.isDiscordOK) return;
+
   struct IDiscordActivityManager *manager =
 	  app.core->get_activity_manager(app.core);
 
-  if (isPresenceActive && song.loaded) {
+  if (isPresenceActive && song.loaded && !song.isPaused) {
 	struct DiscordActivityTimestamps timestamps{};
 	memset(&timestamps, 0, sizeof(timestamps));
-	if (song.runtime) {
-	  timestamps.end = song.starttime + song.runtime + song.pausedtime;
-	}
 	timestamps.start = song.starttime;
+	timestamps.end = song.endtime();
 
 	struct DiscordActivity activity{
 		DiscordActivityType_Listening
@@ -136,18 +144,12 @@ static void updateDiscordPresence(const Song &song) {
 	memset(&activity, 0, sizeof(activity));
 	activity.type = DiscordActivityType_Listening;
 	activity.application_id = APPLICATION_ID;
-	snprintf(activity.details, 128, "%s", song.title.c_str());
-	snprintf(activity.state, 128, "%s",
-			 (song.artist + " - " + song.album).c_str());
+	snprintf(activity.details, 128, "%s - %s", song.title.c_str(), song.artist.c_str());
+	snprintf(activity.state, 128, ""); // empty, so that the text box isn't taller than the cover image
 
 	struct DiscordActivityAssets assets{};
 	memset(&assets, 0, sizeof(assets));
-	if (song.isPaused) {
-	  snprintf(assets.small_image, 128, "%s", "pause");
-	  snprintf(assets.small_text, 128, "%s", "Paused");
-	} else {
-	  activity.timestamps = timestamps;
-	}
+	activity.timestamps = timestamps;
 
 	// Get url of album picture
 	auto cover_id_url = song.cover_id;
@@ -156,9 +158,11 @@ static void updateDiscordPresence(const Song &song) {
 	std::cout << cover_url << "\n";
 
 	snprintf(assets.large_image, 128, "%s", cover_url.c_str());
+	snprintf(assets.large_text, 128, "Album: %s", song.album.c_str());
 
-	snprintf(assets.large_text, 128, "%s",
-			 song.isHighRes() ? "Playing High-Res Audio" : "");
+	snprintf(assets.small_image, 128, "%s", TIDAL_LOGO_URL.c_str());
+	snprintf(assets.small_text, 128, "%s", "Streaming on TIDAL");
+
 	if (song.id[0] != '\0') {
 	  struct DiscordActivitySecrets secrets{};
 	  memset(&secrets, 0, sizeof(secrets));
@@ -172,7 +176,22 @@ static void updateDiscordPresence(const Song &song) {
 	manager->update_activity(manager, &activity, nullptr, nullptr);
   } else {
 	//        std::clog << "Clearing activity\n";
-	manager->clear_activity(manager, nullptr, nullptr);
+	// manager->clear_activity(manager, nullptr, nullptr);
+	struct DiscordActivity activity {
+	  DiscordActivityType_Listening
+	};
+	memset(&activity, 0, sizeof(activity));
+	activity.type = DiscordActivityType_Listening;
+	activity.application_id = APPLICATION_ID;
+	snprintf(activity.details, 128, "Idle");
+	snprintf(activity.state, 128, "");
+	struct DiscordActivityAssets assets {};
+	memset(&assets, 0, sizeof(assets));
+	snprintf(assets.large_image, 128, "%s", TIDAL_LOGO_URL.c_str());
+	snprintf(assets.large_text, 128, "%s", "TIDAL");
+	activity.assets = assets;
+	activity.instance = false;
+	manager->update_activity(manager, &activity, nullptr, nullptr);
   }
 }
 
@@ -207,19 +226,27 @@ static void discordInit() {
   char getSongInfoBuf[1024];
   json j;
   static Song curSong;
+  int kill_timeout = 0;
 
   for (;;) {
-	if (!app.isDiscordOK) {
-	  std::this_thread::sleep_for(std::chrono::seconds(2));
-	  discordInit();
-	  continue;
-	}
+	bool kill_discord = false;
+
 	if (isPresenceActive) {
 	  std::wstring tmpTrack, tmpArtist;
 	  auto localStatus = tidalInfo(tmpTrack, tmpArtist);
 
 	  // If song is playing
 	  if (localStatus == playing) {
+		// only init if something is playing
+		if (!app.isDiscordOK) {
+		  discordInit();
+		  std::clog << "Discord Initialized\n";
+		  if (!app.isDiscordOK) {
+			std::this_thread::sleep_for(std::chrono::seconds(2));
+			continue;
+		  }
+		}
+
 		// if new song is playing
 		if (rawWstringToString(tmpTrack) != curSong.title || rawWstringToString(tmpArtist) != curSong.artist) {
 		  // assign new info to current track
@@ -228,6 +255,7 @@ static void discordInit() {
 
 		  curSong.runtime = 0;
 		  curSong.pausedtime = 0;
+		  curSong.repeatCount = 0;
 		  curSong.setQuality("");
 		  curSong.id[0] = '\0';
 		  curSong.loaded = true;
@@ -249,6 +277,8 @@ static void discordInit() {
 		  if (res && res->status == 200) {
 			try {
 			  j = json::parse(res->body);
+			  bool isSongSet = false;
+			  unsigned int lastAlbumDate = 0;
 			  for (auto i = 0u;
 				   i < j["tracks"]["totalNumberOfItems"].get<unsigned>(); i++) {
 				// convert title from windows and from tidal api to strings,
@@ -262,15 +292,28 @@ static void discordInit() {
 				  if (curSong.runtime == 0 || j["tracks"]["items"][i]["audioQuality"].get<std::string>()
 					  == "HI_RES") { // Ignore songs with same name if you have found
 					// song
-					curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
-					curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
-					curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
-					curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
-					curSong.cover_id = j["tracks"]["items"][i]["album"]["cover"].get<std::string>();
-					sprintf(curSong.id, "%u", j["tracks"]["items"][i]["id"].get<unsigned>());
+					if (!isSongSet) {
+					  curSong.setQuality(j["tracks"]["items"][i]["audioQuality"].get<std::string>());
+					  curSong.trackNumber = j["tracks"]["items"][i]["trackNumber"].get<uint_fast8_t>();
+					  curSong.volumeNumber = j["tracks"]["items"][i]["volumeNumber"].get<uint_fast8_t>();
+					  curSong.runtime = j["tracks"]["items"][i]["duration"].get<int64_t>();
+					  sprintf(curSong.id, "%u", j["tracks"]["items"][i]["id"].get<unsigned>());
+					}
 
-					if (curSong.isHighRes())
-					  break; // keep searching for high-res version.
+					// find the newest album
+					int year = 0, month = 0, day = 0;
+					std::clog << j["tracks"]["items"][i]["album"]["releaseDate"].get<std::string>().c_str() << std::endl << std::flush;
+					sscanf(j["tracks"]["items"][i]["album"]["releaseDate"].get<std::string>().c_str(), "%d-%d-%d", &year, &month, &day);
+					unsigned int albumDate = year * 10000 + month * 100 + day;
+					if (albumDate > lastAlbumDate) {
+					  curSong.cover_id = j["tracks"]["items"][i]["album"]["cover"].get<std::string>();
+					  curSong.album = j["tracks"]["items"][i]["album"]["title"].get<std::string>();
+					  lastAlbumDate = albumDate;
+					}
+
+					if (curSong.isHighRes()) {
+					  isSongSet = true; // keep searching for high-res version.
+					}
 				  }
 				}
 			  }
@@ -296,7 +339,13 @@ static void discordInit() {
 			updateDiscordPresence(curSong);
 
 			std::lock_guard<std::mutex> lock(currentSongMutex);
-			currentStatus = "Paused " + curSong.title;
+			currentStatus = "Playing " + curSong.title;
+		  }
+		  if (CURRENT_TIME > curSong.endtime()) {
+			curSong.starttime = CURRENT_TIME;
+			curSong.pausedtime = 0;
+			curSong.repeatCount += 1;
+			updateDiscordPresence(curSong);
 		  }
 		}
 
@@ -304,27 +353,46 @@ static void discordInit() {
 		curSong.pausedtime += 1;
 		curSong.isPaused = true;
 		updateDiscordPresence(curSong);
+		kill_discord = true;
 
 		std::lock_guard<std::mutex> lock(currentSongMutex);
 		currentStatus = "Paused " + curSong.title;
 	  } else {
 		curSong = Song();
 		updateDiscordPresence(curSong);
+		kill_discord = true;
 
 		std::lock_guard<std::mutex> lock(currentSongMutex);
 		currentStatus = "Waiting for Tidal";
 	  }
-	} else {
-	  curSong = Song();
-	  updateDiscordPresence(curSong);
-
-	  std::lock_guard<std::mutex> lock(currentSongMutex);
-	  currentStatus = "Disabled";
 	}
 
-	enum EDiscordResult result = app.core->run_callbacks(app.core);
-	if (result != DiscordResult_Ok) {
-	  std::clog << "Bad result " << result << "\n";
+	if (app.isDiscordOK) {
+	  if (!isPresenceActive) {
+		kill_discord = true;
+		curSong = Song();
+		updateDiscordPresence(curSong);
+
+		std::lock_guard<std::mutex> lock(currentSongMutex);
+		currentStatus = "Disabled";
+	  }
+
+	  enum EDiscordResult result = app.core->run_callbacks(app.core);
+	  if (result != DiscordResult_Ok) {
+		std::clog << "Bad result " << result << "\n";
+	  }
+
+	  if (!kill_discord) {
+		kill_timeout = 0;
+	  }
+	  else if (kill_timeout++ >= RPC_IDLE_TIMEOUT_SECONDS) {
+		struct IDiscordActivityManager* manager = app.core->get_activity_manager(app.core);
+		manager->clear_activity(manager, nullptr, nullptr);
+		app.core->destroy(app.core);
+		app.core = nullptr;
+		app.isDiscordOK = false;
+		kill_timeout = 0;
+	  }
 	}
 
 	std::this_thread::sleep_for(std::chrono::milliseconds(1000));
@@ -332,6 +400,22 @@ static void discordInit() {
 }
 
 int main(int argc, char **argv) {
+
+  // allow passing a custom application id (for custom "game" title)
+  if (argc == 2) {
+	const char* app_id = argv[1];
+	try {
+	  APPLICATION_ID = std::stoll(app_id);
+	}
+	catch (std::exception const& ex) {
+	  std::cerr << "The first argument must be a Discord application ID." << std::endl;
+	  return -1;
+	}
+  }
+  else if (argc > 2) {
+	std::cerr << "Too many arguments." << std::endl;
+	return -1;
+  }
 
   // get country code for TIDAL api queries
   countryCode = getLocale();
@@ -426,8 +510,8 @@ int main(int argc, char **argv) {
   QObject::connect(&app, &QApplication::aboutToQuit,
 				   [&timer]() { timer.stop(); });
 
-  discordInit();
-  std::clog << "Discord Initialized\n";
+  // discordInit();
+  // std::clog << "Discord Initialized\n";
 
   // RPC loop call
   std::thread t1(rpcLoop);
